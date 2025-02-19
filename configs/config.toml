@@ -1,6 +1,7 @@
 [distribution]
 nparts  = 1e9
 nbins   = 1000
+extent_factor = 3.0
 
 radii   = [ 10.0, 5.0 ]
 rad_spreads = [ 1.0, 0.5 ]

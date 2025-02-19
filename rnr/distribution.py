@@ -1,3 +1,4 @@
+import matplotlib.pyplot as plt
 import numpy as np
 
 from numpy.typing import NDArray
@@ -17,6 +18,12 @@ class Distribution:
         self.centers = centers
         self.edges = edges
         self.widths = widths
+
+    def plot(self, i: int, scale='linear', **kwargs) -> None:
+        plt.bar(self.centers[i], self.counts[i], width=self.widths[i], **kwargs)
+        plt.xscale(scale)
+
+        plt.savefig("figs/distrib.pdf", dpi=300)
 
 
 class DistributionBuilder:
@@ -38,6 +45,7 @@ class DistributionBuilder:
 
         # Get the log-normal median and spread parameters
         medians, spreads = [], []
+
         if self.distribution.params == 'biasi':
             medians, spreads = biasi_params(*self.distribution.radii)
         elif self.distribution.params == 'custom':
@@ -48,7 +56,7 @@ class DistributionBuilder:
         edges = np.empty([ndistribs, self.distribution.nbins + 1])
 
         for i, radius in enumerate(self.distribution.radii):
-            edges[i] = np.linspace(0.0, medians[i]*10, self.distribution.nbins + 1)
+            edges[i] = np.linspace(0.0, medians[i]*self.distribution.extent_factor, self.distribution.nbins + 1)
 
         widths = edges[:,1:] - edges[:,:-1]
         centers =  (edges[:,1:] + edges[:,:-1])/2

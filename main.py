@@ -20,5 +20,7 @@ def main():
     builder = DistributionBuilder(**config)
     distrib = builder.generate()
 
+    distrib.plot(0)
+
 if __name__ == "__main__":
     main()
