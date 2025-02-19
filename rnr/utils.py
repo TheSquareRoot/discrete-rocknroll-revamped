@@ -1,12 +1,14 @@
 import toml
 import sys
 
+import numpy as np
+
 from .config import setup_logging
 
 # Configure module logger from config file
 logger = setup_logging(__name__, 'logs/log.log')
 
-def load_config(file_path):
+def load_config(file_path: str) -> dict:
     try:
         with open(file_path, "r") as file:
             logger.info(f"Loading configuration from {file_path}")
@@ -17,3 +19,25 @@ def load_config(file_path):
     except toml.TomlDecodeError as e:
         logger.error(f"Error: Failed to parse '{file_path}': {e}", file=sys.stderr)
         sys.exit(1)
+
+
+def biasi_params(*radii) -> tuple:
+    """
+    Return the log-normal median and spread parameters for an arbitrary number of radii.
+    Uses the fit from Biasi (2001).
+
+    NOTE: radii are in microns.
+    """
+    medians = [0.016 - 0.0023 * (r ** 0.545) for r in radii]
+    spreads = [1.8 + 0.136 * (r ** 1.4) for r in radii]
+
+    return medians, spreads
+
+
+def log_norm(fadh_norm: float, mean: float, stdv: float) -> float:
+    """Log normal PDF. Geometric parameters are used."""
+    proba_density = (1 / np.sqrt(2 * np.pi)) * (1 / (fadh_norm * np.log(stdv))) * np.exp(
+        -0.5 * (np.log(fadh_norm / mean) / np.log(stdv)) ** 2)
+
+    return proba_density
+

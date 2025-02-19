@@ -1,15 +1,13 @@
 [distribution]
 nparts  = 1e9
 nbins   = 1000
-fmin    = 0.0
-fmax    = 0.1
 
 radii   = [ 10.0, 5.0 ]
-rspread = [ 1.0, 0.5 ]
+rad_spreads = [ 1.0, 0.5 ]
 
 params  = 'biasi'
-adh_median = [ 1.0, 1.0 ]
-adh_scatter = [ 1.0, 1.0 ]
+adh_medians = [ 1.0, 1.0 ]
+adh_spreads = [ 1.0, 1.0 ]
 
 [physics]
 adhesion_model = 'Rabinovich'
