@@ -2,7 +2,7 @@ import sys
 
 from rnr.check_config import check_config
 from rnr.config import setup_logging
-from rnr.distribution import DistributionBuilder
+from rnr.distribution import SizeDistributionBuilder
 from rnr.utils import load_config
 
 logger = setup_logging(__name__, 'logs/log.log')
@@ -15,12 +15,12 @@ def main():
     logger.info('Checking parameters...')
     check_config(config)
 
-    # Build the adhesion force distribution
-    logger.info('Generating distribution...')
-    builder = DistributionBuilder(**config)
-    distrib = builder.generate()
+    # Build the particle size distribution
+    logger.info('Generating size distribution...')
+    sizedistrib_builder = SizeDistributionBuilder(**config)
+    size_distrib = sizedistrib_builder.generate()
 
-    distrib.plot(0)
+    size_distrib.plot(scale='linear')
 
 if __name__ == "__main__":
     main()

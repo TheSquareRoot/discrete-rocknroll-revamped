@@ -34,10 +34,15 @@ def biasi_params(*radii) -> tuple:
     return medians, spreads
 
 
-def log_norm(fadh_norm: float, mean: float, stdv: float) -> float:
+def normal(x: float, mean: float, stdv: float) -> float:
+    proba_density = np.exp(-(x - mean) ** 2 / (2 * (stdv ** 2))) / np.sqrt(2 * np.pi * (stdv ** 2))
+
+    return proba_density
+
+def log_norm(x: float, mean: float, stdv: float) -> float:
     """Log normal PDF. Geometric parameters are used."""
-    proba_density = (1 / np.sqrt(2 * np.pi)) * (1 / (fadh_norm * np.log(stdv))) * np.exp(
-        -0.5 * (np.log(fadh_norm / mean) / np.log(stdv)) ** 2)
+    proba_density = (1 / np.sqrt(2 * np.pi)) * (1 / (x * np.log(stdv))) * np.exp(
+        -0.5 * (np.log(x / mean) / np.log(stdv)) ** 2)
 
     return proba_density
 

@@ -12,7 +12,7 @@ def setup_logging(name, log_file):
     console_handler = StreamHandler()
 
     file_handler.setLevel(logging.DEBUG)
-    console_handler.setLevel(logging.INFO)
+    console_handler.setLevel(logging.DEBUG)
 
     # Add handlers to logger
     logger.addHandler(file_handler)
