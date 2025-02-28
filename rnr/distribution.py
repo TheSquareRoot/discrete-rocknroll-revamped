@@ -38,6 +38,8 @@ class SizeDistribution:
 
     def plot(self, scale: str = 'log', **kwargs) -> None:
         """Basic bar plot of the size distribution."""
+        plt.clf()
+
         plt.bar(self.radii, self.weights, **kwargs)
 
         plt.xscale(scale)
@@ -86,18 +88,23 @@ class SizeDistributionBuilder(DistributionBuilder):
 
 class AdhesionDistribution:
     def __init__(self,
-                 counts: NDArray[np.int_],
+                 weights: NDArray[np.float64],
                  centers: NDArray[np.float64],
                  edges: NDArray[np.float64],
                  widths: NDArray[np.float64],
                  ) -> None:
-        self.counts = counts
+        self.weights = weights
         self.centers = centers
         self.edges = edges
         self.widths = widths
 
-    def plot(self,) -> None:
-        pass
+    def plot(self, i: int, scale: str = 'log', **kwargs) -> None:
+        plt.clf()
+
+        plt.bar(self.centers[i], self.weights[i], width=self.widths[i], **kwargs)
+        plt.xscale(scale)
+
+        plt.savefig("figs/adh_distrib.png", dpi=300)
 
 
 class AdhesionDistributionBuilder(DistributionBuilder):
@@ -106,4 +113,31 @@ class AdhesionDistributionBuilder(DistributionBuilder):
         self.size_distrib = size_distrib
 
     def generate(self,) -> AdhesionDistribution:
-        pass
+        """
+        Generate an adhesion force distribution from the parameters loaded from the config file.
+        A log-normal distribution is assumed for each size bin.
+        """
+        # Get the log-normal median and spread parameters
+        medians, spreads = biasi_params(*self.size_distrib.radii)
+
+        edges = np.empty([self.sizedistrib.nbins, self.adhdistrib.nbins + 1])
+
+        for i in range(self.sizedistrib.nbins):
+            edges[i,:] = np.linspace(0.0, medians[i]*self.adhdistrib.fmax, self.adhdistrib.nbins + 1)
+
+        widths = edges[:,1:] - edges[:,:-1]
+        centers =  (edges[:,1:] + edges[:,:-1])/2
+
+        # Compute the bin probabilities
+        weights = np.zeros_like(centers)
+
+        print(np.shape(weights))
+
+        for i in range(self.sizedistrib.nbins):
+            for j in range(self.adhdistrib.nbins):
+                weights[i, j] = quad(log_norm, edges[i, j], edges[i, j + 1], args=(medians[i], spreads[i],))[0]
+
+        # Instantiate the adhesion force distribution
+        adh_distrib = AdhesionDistribution(weights, centers, edges, widths)
+
+        return adh_distrib
