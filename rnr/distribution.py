@@ -12,6 +12,19 @@ from .utils import biasi_params, normal, log_norm
 logger = setup_logging(__name__, 'logs/log.log')
 
 
+class DistributionBuilder:
+    def __init__(self, **kwargs):
+        for key, value in kwargs.items():
+            if isinstance(value, dict):
+                # Recursively convert dicts into DistributionBuilder instances
+                setattr(self, key, DistributionBuilder(**value))
+            else:
+                setattr(self, key, value)
+
+    def generate(self):
+        pass
+
+
 class SizeDistribution:
     def __init__(self,
                  modes: NDArray[np.float64],
@@ -35,15 +48,7 @@ class SizeDistribution:
         plt.savefig('figs/size_distrib.png', dpi=300)
 
 
-class SizeDistributionBuilder:
-    def __init__(self, **kwargs):
-        for key, value in kwargs.items():
-            if isinstance(value, dict):
-                # Recursively convert dicts into DistributionBuilder instances
-                setattr(self, key, SizeDistributionBuilder(**value))
-            else:
-                setattr(self, key, value)
-
+class SizeDistributionBuilder(DistributionBuilder):
     def _radius_domain(self,) -> NDArray[np.float64]:
         """Computes the radius domain of the size distribution."""
         lower_bounds, upper_bounds = [], []
@@ -77,3 +82,28 @@ class SizeDistributionBuilder:
                                         weights)
 
         return size_distrib
+
+
+class AdhesionDistribution:
+    def __init__(self,
+                 counts: NDArray[np.int_],
+                 centers: NDArray[np.float64],
+                 edges: NDArray[np.float64],
+                 widths: NDArray[np.float64],
+                 ) -> None:
+        self.counts = counts
+        self.centers = centers
+        self.edges = edges
+        self.widths = widths
+
+    def plot(self,) -> None:
+        pass
+
+
+class AdhesionDistributionBuilder(DistributionBuilder):
+    def __init__(self, size_distrib: SizeDistribution, **kwargs) -> None:
+        super().__init__(**kwargs)
+        self.size_distrib = size_distrib
+
+    def generate(self,) -> AdhesionDistribution:
+        pass
