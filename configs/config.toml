@@ -19,12 +19,12 @@ duration = 10.0
 dt = 1e-2
 
 target_vel = 0.5
-acc_time = 0.0
+acc_time = 3.0
 
 [physics]
 adhesion_model = 'Rabinovich'
 
 density = 1.293
 viscosity = 1.52e-5
-surface_energy = 0.15
+surf_energy = 0.15
 contact_radius = 100

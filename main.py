@@ -23,8 +23,6 @@ def main():
 
     size_distrib.plot(scale='linear')
 
-    print(size_distrib.radii)
-
     # Build the adhesion force distribution
     logger.info('Generating adhesion distribution...')
     adhesion_builder = AdhesionDistributionBuilder(size_distrib, **config)
