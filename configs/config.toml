@@ -12,8 +12,19 @@ nbins = 50
 width = 3.0
 
 modes   = [ 10.0, 5.0 ]
-spreads = [ 1.0, 0.5 ]
 weights = [ 2.0, 1.0 ]
+
+[sim]
+duration = 10.0
+dt = 1e-2
+
+target_vel = 0.5
+acc_time = 0.0
 
 [physics]
 adhesion_model = 'Rabinovich'
+
+density = 1.293
+viscosity = 1.52e-5
+surface_energy = 0.15
+contact_radius = 100

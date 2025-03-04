@@ -3,6 +3,7 @@ import sys
 from rnr.check_config import check_config
 from rnr.config import setup_logging
 from rnr.distribution import SizeDistributionBuilder, AdhesionDistributionBuilder
+from rnr.flow import FlowBuilder
 from rnr.utils import load_config
 
 logger = setup_logging(__name__, 'logs/log.log')
@@ -31,6 +32,12 @@ def main():
 
     adh_distrib.plot(1, scale='linear')
 
+    # Build the flow
+    logger.info('Generating friction velocity time history...')
+    flow_builder = FlowBuilder(**config)
+    flow = flow_builder.generate()
+
+    flow.plot(scale='linear')
 
 if __name__ == "__main__":
     main()
