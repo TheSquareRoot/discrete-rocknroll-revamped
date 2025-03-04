@@ -1,5 +1,4 @@
 import sys
-import time
 
 from rnr.check_config import check_config
 from rnr.config import setup_logging
@@ -23,12 +22,14 @@ def main():
 
     size_distrib.plot(scale='linear')
 
+    print(size_distrib.radii)
+
     # Build the adhesion force distribution
     logger.info('Generating adhesion distribution...')
     adhesion_builder = AdhesionDistributionBuilder(size_distrib, **config)
     adh_distrib = adhesion_builder.generate()
 
-    adh_distrib.plot(0, scale='linear')
+    adh_distrib.plot(1, scale='linear')
 
 
 if __name__ == "__main__":

@@ -61,11 +61,22 @@ class SizeDistributionBuilder(DistributionBuilder):
 
         return np.logspace(np.log10(min(lower_bounds)), np.log10(max(upper_bounds)), num=self.sizedistrib.nbins)
 
-    def generate(self,) -> SizeDistribution:
+    def _generate_no_spread(self,) -> SizeDistribution:
+        size_dsitrib = SizeDistribution(np.array(self.sizedistrib.modes),
+                                       np.zeros_like(self.sizedistrib.modes),
+                                       np.array(self.sizedistrib.modes),
+                                       np.ones_like(self.sizedistrib.modes)
+                                       )
+
+        return size_dsitrib
+
+    def _generate_with_spread(self,) -> SizeDistribution:
         """
         Generate a particle size distribution from the parameters loaded from the config file.
         The result is a composite of normal distributions.
         """
+        # TODO: integrate the normal distribution to compute the weights
+
         # Get the domain over which the size distribution will be generated
         rad_domain = self._radius_domain()
         logger.debug(f'Size domain is [{np.min(rad_domain):.2f}, {np.max(rad_domain):.2f}]')
@@ -84,6 +95,12 @@ class SizeDistributionBuilder(DistributionBuilder):
                                         weights)
 
         return size_distrib
+
+    def generate(self,) -> SizeDistribution:
+        if hasattr(self.sizedistrib, 'spreads'):
+            return self._generate_with_spread()
+        else:
+            return self._generate_no_spread()
 
 
 class AdhesionDistribution:
@@ -120,9 +137,9 @@ class AdhesionDistributionBuilder(DistributionBuilder):
         # Get the log-normal median and spread parameters
         medians, spreads = biasi_params(*self.size_distrib.radii)
 
-        edges = np.empty([self.sizedistrib.nbins, self.adhdistrib.nbins + 1])
+        edges = np.empty([self.sizedistrib.nmodes, self.adhdistrib.nbins + 1])
 
-        for i in range(self.sizedistrib.nbins):
+        for i in range(self.sizedistrib.nmodes):
             edges[i,:] = np.linspace(0.0, medians[i]*self.adhdistrib.fmax, self.adhdistrib.nbins + 1)
 
         widths = edges[:,1:] - edges[:,:-1]
@@ -133,7 +150,7 @@ class AdhesionDistributionBuilder(DistributionBuilder):
 
         print(np.shape(weights))
 
-        for i in range(self.sizedistrib.nbins):
+        for i in range(self.sizedistrib.nmodes):
             for j in range(self.adhdistrib.nbins):
                 weights[i, j] = quad(log_norm, edges[i, j], edges[i, j + 1], args=(medians[i], spreads[i],))[0]
 
