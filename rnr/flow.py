@@ -3,6 +3,7 @@ import numpy as np
 
 from numpy.typing import NDArray
 
+from .builder import Builder
 from .config import setup_logging
 
 
@@ -28,15 +29,7 @@ class Flow:
 
         plt.savefig('figs/velocity.png', dpi=300)
 
-class FlowBuilder:
-    def __init__(self, **kwargs):
-        for key, value in kwargs.items():
-            if isinstance(value, dict):
-                # Recursively convert dicts into DistributionBuilder instances
-                setattr(self, key, FlowBuilder(**value))
-            else:
-                setattr(self, key, value)
-
+class FlowBuilder(Builder):
     def generate(self,) -> Flow:
         # First generate the time array
         time = np.arange(0.0, self.sim.duration, self.sim.dt)

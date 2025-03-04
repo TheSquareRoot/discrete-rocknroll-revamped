@@ -4,25 +4,13 @@ import numpy as np
 from numpy.typing import NDArray
 from scipy.integrate import quad
 
+from .builder import Builder
 from .config import setup_logging
 from .utils import biasi_params, normal, log_norm
 
 
 # Configure module logger from config file
 logger = setup_logging(__name__, 'logs/log.log')
-
-
-class DistributionBuilder:
-    def __init__(self, **kwargs):
-        for key, value in kwargs.items():
-            if isinstance(value, dict):
-                # Recursively convert dicts into DistributionBuilder instances
-                setattr(self, key, DistributionBuilder(**value))
-            else:
-                setattr(self, key, value)
-
-    def generate(self):
-        pass
 
 
 class SizeDistribution:
@@ -50,7 +38,7 @@ class SizeDistribution:
         plt.savefig('figs/size_distrib.png', dpi=300)
 
 
-class SizeDistributionBuilder(DistributionBuilder):
+class SizeDistributionBuilder(Builder):
     def _radius_domain(self,) -> NDArray[np.float64]:
         """Computes the radius domain of the size distribution."""
         lower_bounds, upper_bounds = [], []
@@ -124,7 +112,7 @@ class AdhesionDistribution:
         plt.savefig("figs/adh_distrib.png", dpi=300)
 
 
-class AdhesionDistributionBuilder(DistributionBuilder):
+class AdhesionDistributionBuilder(Builder):
     def __init__(self, size_distrib: SizeDistribution, **kwargs) -> None:
         super().__init__(**kwargs)
         self.size_distrib = size_distrib
