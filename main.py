@@ -20,6 +20,7 @@ def main():
     logger.info('Generating size distribution...')
     sizedistrib_builder = SizeDistributionBuilder(**config)
     size_distrib = sizedistrib_builder.generate()
+    logger.debug(f'Size distribution generated: {size_distrib}')
 
     size_distrib.plot(scale='linear')
 
@@ -27,8 +28,9 @@ def main():
     logger.info('Generating adhesion distribution...')
     adhesion_builder = AdhesionDistributionBuilder(size_distrib, **config)
     adh_distrib = adhesion_builder.generate()
+    logger.debug(f'Adhesion distribution generated: {adh_distrib}')
 
-    adh_distrib.plot(1, scale='linear')
+    adh_distrib.plot(0, norm=False, scale='linear')
 
     # Build the flow
     logger.info('Generating friction velocity time history...')

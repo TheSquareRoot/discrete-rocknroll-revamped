@@ -46,3 +46,5 @@ def log_norm(x: float, mean: float, stdv: float) -> float:
 
     return proba_density
 
+def force_jkr(surface_energy: float, radius: float) -> float:
+    return 1.5 * np.pi * surface_energy * radius
