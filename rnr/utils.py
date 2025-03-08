@@ -8,18 +8,6 @@ from .config import setup_logging
 # Configure module logger from config file
 logger = setup_logging(__name__, 'logs/log.log')
 
-def load_config(file_path: str) -> dict:
-    try:
-        with open(file_path, "r") as file:
-            logger.info(f"Loading configuration from {file_path}")
-            return toml.load(file)
-    except FileNotFoundError:
-        logger.error(f"Error: Configuration file '{file_path}' not found.")
-        sys.exit(1)
-    except toml.TomlDecodeError as e:
-        logger.error(f"Error: Failed to parse '{file_path}': {e}", file=sys.stderr)
-        sys.exit(1)
-
 
 def biasi_params(*radii) -> tuple:
     """
@@ -34,10 +22,23 @@ def biasi_params(*radii) -> tuple:
     return medians, spreads
 
 
-def normal(x: float, mean: float, stdv: float) -> float:
-    proba_density = np.exp(-(x - mean) ** 2 / (2 * (stdv ** 2))) / np.sqrt(2 * np.pi * (stdv ** 2))
+def force_jkr(surface_energy: float, radius: float) -> float:
+    """Adhesion force of a spherical particle on a flat surface according to JKR theory."""
+    return 1.5 * np.pi * surface_energy * radius
 
-    return proba_density
+
+def load_config(file_path: str) -> dict:
+    try:
+        with open(file_path, "r") as file:
+            logger.info(f"Loading configuration from {file_path}")
+            return toml.load(file)
+    except FileNotFoundError:
+        logger.error(f"Error: Configuration file '{file_path}' not found.")
+        sys.exit(1)
+    except toml.TomlDecodeError as e:
+        logger.error(f"Error: Failed to parse '{file_path}': {e}", file=sys.stderr)
+        sys.exit(1)
+
 
 def log_norm(x: float, mean: float, stdv: float) -> float:
     """Log normal PDF. Geometric parameters are used."""
@@ -46,5 +47,9 @@ def log_norm(x: float, mean: float, stdv: float) -> float:
 
     return proba_density
 
-def force_jkr(surface_energy: float, radius: float) -> float:
-    return 1.5 * np.pi * surface_energy * radius
+
+def normal(x: float, mean: float, stdv: float) -> float:
+    """Normal PDF"""
+    proba_density = np.exp(-(x - mean) ** 2 / (2 * (stdv ** 2))) / np.sqrt(2 * np.pi * (stdv ** 2))
+
+    return proba_density
