@@ -3,7 +3,6 @@ import numpy as np
 
 from numpy.typing import NDArray
 
-from .builder import Builder
 from .config import setup_logging
 
 
@@ -13,9 +12,10 @@ logger = setup_logging(__name__, 'logs/log.log')
 
 class Flow:
     def __init__(self,
-                 velocity: NDArray[np.float64],
-                 time: NDArray[np.float64],
+                 velocity: NDArray[np.floating],
+                 time: NDArray[np.floating],
                  ) -> None:
+
         self.velocity = velocity
         self.time = time
 
@@ -34,16 +34,29 @@ class Flow:
 
         plt.savefig('figs/velocity.png', dpi=300)
 
-class FlowBuilder(Builder):
+class FlowBuilder:
+    def __init__(self,
+                 duration: float,
+                 dt: float,
+                 target_vel:  float,
+                 acc_time: float,
+                 **kwargs,
+                 ) -> None:
+
+        self.duration = duration
+        self.dt = dt
+        self.target_vel = target_vel
+        self.acc_time = acc_time
+
     def generate(self,) -> Flow:
         # First generate the time array
-        time = np.arange(0.0, self.sim.duration, self.sim.dt)
+        time = np.arange(0.0, self.duration, self.dt)
 
         # Then compute the velocity as a function of time
-        if self.sim.acc_time != 0.0:
-            velocity = np.clip((self.sim.target_vel / self.sim.acc_time) * time, 0, self.sim.target_vel)
+        if self.acc_time != 0.0:
+            velocity = np.clip((self.target_vel / self.acc_time) * time, 0, self.target_vel)
         else:
-            velocity = np.ones_like(time) * self.sim.target_vel
+            velocity = np.ones_like(time) * self.target_vel
 
         # Instantiate the flow class
         flow = Flow(velocity,

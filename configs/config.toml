@@ -1,6 +1,5 @@
 [adhdistrib]
-nparts  = 1e9
-nbins   = 1000
+nbins   = 100
 fmax = 2.0
 
 params  = 'biasi'
@@ -12,19 +11,20 @@ nbins = 50
 width = 3.0
 
 modes   = [ 10.0, 5.0 ]
+spreads = [ 0.5, 0.5 ]
 weights = [ 2.0, 1.0 ]
 
-[sim]
+[simulation]
 duration = 10.0
-dt = 1e-2
+dt = 1e-1
 
-target_vel = 0.5
-acc_time = 3.0
+target_vel = 1.0
+acc_time = 5.0
 
 [physics]
-adhesion_model = 'Rabinovich'
+adhesion_model = 'JKR'
+aero_model = 'custom'
 
 density = 1.293
 viscosity = 1.52e-5
 surf_energy = 0.15
-contact_radius = 100

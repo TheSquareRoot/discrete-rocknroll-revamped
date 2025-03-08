@@ -4,7 +4,6 @@ import numpy as np
 from numpy.typing import NDArray
 from scipy.integrate import quad
 
-from .builder import Builder
 from .config import setup_logging
 from .utils import biasi_params, force_jkr, log_norm, normal
 
@@ -15,10 +14,10 @@ logger = setup_logging(__name__, 'logs/log.log')
 
 class SizeDistribution:
     def __init__(self,
-                 modes: NDArray[np.float64],
-                 spreads: NDArray[np.float64],
-                 radii: NDArray[np.float64],
-                 counts: NDArray[np.float64]):
+                 modes: NDArray[np.floating],
+                 spreads: NDArray[np.floating],
+                 radii: NDArray[np.floating],
+                 counts: NDArray[np.floating]):
         self.modes = modes
         self.spreads = spreads
         self.radii = radii
@@ -51,22 +50,39 @@ class SizeDistribution:
         plt.savefig('figs/size_distrib.png', dpi=300)
 
 
-class SizeDistributionBuilder(Builder):
+class SizeDistributionBuilder:
+    def __init__(self,
+                 nmodes: int,
+                 width: float,
+                 nbins: int,
+                 modes: list[float],
+                 spreads: list[float],
+                 weights: list[float],
+                 **kwargs,
+                 ) -> None:
+
+        self.nmodes = nmodes
+        self.width = width
+        self.nbins = nbins
+        self.modes = modes
+        self.spreads = spreads
+        self.weights = weights
+
     def _radius_domain(self,) -> NDArray[np.float64]:
         """Computes the radius domain of the size distribution."""
         lower_bounds, upper_bounds = [], []
 
-        for i in range(self.sizedistrib.nmodes):
-            lower_bounds.append(self.sizedistrib.modes[i] - self.sizedistrib.width * self.sizedistrib.spreads[i])
-            upper_bounds.append(self.sizedistrib.modes[i] + self.sizedistrib.width * self.sizedistrib.spreads[i])
+        for i in range(self.nmodes):
+            lower_bounds.append(self.modes[i] - self.width * self.spreads[i])
+            upper_bounds.append(self.modes[i] + self.width * self.spreads[i])
 
-        return np.logspace(np.log10(min(lower_bounds)), np.log10(max(upper_bounds)), num=self.sizedistrib.nbins)
+        return np.logspace(np.log10(min(lower_bounds)), np.log10(max(upper_bounds)), num=self.nbins)
 
     def _generate_no_spread(self,) -> SizeDistribution:
-        size_distrib = SizeDistribution(np.array(self.sizedistrib.modes),
-                                       np.zeros_like(self.sizedistrib.modes),
-                                       np.array(self.sizedistrib.modes),
-                                       np.ones_like(self.sizedistrib.modes)
+        size_distrib = SizeDistribution(np.array(self.modes),
+                                       np.zeros_like(self.modes),
+                                       np.array(self.modes),
+                                       np.ones_like(self.modes)
                                        )
 
         return size_distrib
@@ -85,20 +101,20 @@ class SizeDistributionBuilder(Builder):
         # Compute the distribution function
         weights = np.zeros_like(rad_domain)
 
-        for i in range(self.sizedistrib.nbins):
-            for j in range(self.sizedistrib.nmodes):
-                weights[i] += self.sizedistrib.weights[j] * normal(rad_domain[i], self.sizedistrib.modes[j], self.sizedistrib.spreads[j])
+        for i in range(self.nbins):
+            for j in range(self.nmodes):
+                weights[i] += self.weights[j] * normal(rad_domain[i], self.modes[j], self.spreads[j])
 
         # Instantiate the size distribution
-        size_distrib = SizeDistribution(np.array(self.sizedistrib.modes),
-                                        np.array(self.sizedistrib.spreads),
+        size_distrib = SizeDistribution(np.array(self.modes),
+                                        np.array(self.spreads),
                                         rad_domain,
                                         weights)
 
         return size_distrib
 
     def generate(self,) -> SizeDistribution:
-        if hasattr(self.sizedistrib, 'spreads'):
+        if hasattr(self, 'spreads'):
             return self._generate_with_spread()
         else:
             return self._generate_no_spread()
@@ -106,9 +122,9 @@ class SizeDistributionBuilder(Builder):
 
 class AdhesionDistribution:
     def __init__(self,
-                 weights: NDArray[np.float64],
-                 fadh_norm: NDArray[np.float64],
-                 norm_factors: NDArray[np.float64],
+                 weights: NDArray[np.floating],
+                 fadh_norm: NDArray[np.floating],
+                 norm_factors: NDArray[np.floating],
                  ) -> None:
         self.weights = weights
         self.fadh_norm = fadh_norm
@@ -124,7 +140,7 @@ class AdhesionDistribution:
         )
 
     @property
-    def fadh(self,) -> NDArray[np.float64]:
+    def fadh(self,) -> NDArray[np.floating]:
         """Return a denormalized adhesion force array"""
         return self.fadh_norm * self.norm_factors
 
@@ -144,10 +160,19 @@ class AdhesionDistribution:
         plt.savefig("figs/adh_distrib.png", dpi=300)
 
 
-class AdhesionDistributionBuilder(Builder):
-    def __init__(self, size_distrib: SizeDistribution, **kwargs) -> None:
-        super().__init__(**kwargs)
+class AdhesionDistributionBuilder:
+    def __init__(self,
+                 size_distrib: SizeDistribution,
+                 nbins: int,
+                 fmax: float,
+                 surface_energy: float,
+                 **kwargs,
+                 ) -> None:
+
         self.size_distrib = size_distrib
+        self.nbins = nbins
+        self.fmax = fmax
+        self.surface_energy = surface_energy
 
     def generate(self,) -> AdhesionDistribution:
         """
@@ -155,22 +180,22 @@ class AdhesionDistributionBuilder(Builder):
         A log-normal distribution is assumed for each size bin.
         """
         # Initialize arrays
-        edges = np.empty([self.size_distrib.nbins, self.adhdistrib.nbins + 1])
-        fadh_norm = np.empty([self.size_distrib.nbins, self.adhdistrib.nbins])
+        edges = np.empty([self.size_distrib.nbins, self.nbins + 1])
+        fadh_norm = np.empty([self.size_distrib.nbins, self.nbins])
         weights = np.empty_like(fadh_norm)
 
         # Get the log-normal median and spread parameters
         medians, spreads = biasi_params(*self.size_distrib.radii)
 
         # Compute the normalization factor for each size bin
-        norm_factors = np.array([[force_jkr(self.physics.surf_energy, r*1e-6),] for r in self.size_distrib.radii])
+        norm_factors = np.array([[force_jkr(self.surface_energy, r*1e-6),] for r in self.size_distrib.radii])
 
         for i in range(self.size_distrib.nbins):
-            edges[i,:] = np.linspace(0.0, medians[i]*self.adhdistrib.fmax, self.adhdistrib.nbins + 1)
+            edges[i,:] = np.linspace(0.0, medians[i]*self.fmax, self.nbins + 1)
 
             fadh_norm[i,:] =  (edges[i,1:] + edges[i,:-1])/2
 
-            for j in range(self.adhdistrib.nbins):
+            for j in range(self.nbins):
                 weights[i, j] = quad(log_norm, edges[i, j], edges[i, j + 1], args=(medians[i], spreads[i],))[0]
 
         # Instantiate the adhesion force distribution
