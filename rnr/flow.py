@@ -15,17 +15,13 @@ class Flow:
     def __init__(self,
                  velocity: NDArray[np.float64],
                  time: NDArray[np.float64],
-                 density: float,
-                 viscosity: float,
-                 surf_energy: float,
-                 contact_radius: float,
                  ) -> None:
         self.velocity = velocity
         self.time = time
-        self.density = density
-        self.viscosity = viscosity
-        self.surf_energy = surf_energy
-        self.contact_radius = contact_radius
+
+    @property
+    def nsteps(self,) -> int:
+        return len(self.time)
 
     def plot(self, scale: str = 'linear', **kwargs) -> None:
         plt.clf()
@@ -52,10 +48,6 @@ class FlowBuilder(Builder):
         # Instantiate the flow class
         flow = Flow(velocity,
                     time,
-                    self.physics.density,
-                    self.physics.viscosity,
-                    self.physics.surf_energy,
-                    self.physics.contact_radius,
                     )
 
         return flow
