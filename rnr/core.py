@@ -36,7 +36,9 @@ def run(config_file: str) -> None:
 
     # Build the flow
     logger.info('Generating friction velocity time history...')
-    flow_builder = FlowBuilder(**config['simulation'])
+    flow_params = {**config['simulation'], **config['physics']}
+    flow_builder = FlowBuilder(size_distrib=size_distrib,
+                               **flow_params)
     flow = flow_builder.generate()
 
     flow.plot(scale='linear')
