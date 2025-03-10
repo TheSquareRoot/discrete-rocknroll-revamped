@@ -27,4 +27,4 @@ aero_model = 'custom'
 
 density = 1.293
 viscosity = 1.52e-5
-surf_energy = 0.15
+surface_energy = 0.15
