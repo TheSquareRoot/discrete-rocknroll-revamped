@@ -185,7 +185,7 @@ class AdhesionDistributionBuilder:
         weights = np.empty_like(fadh_norm)
 
         # Get the log-normal median and spread parameters
-        medians, spreads = biasi_params(*self.size_distrib.radii)
+        medians, spreads = biasi_params(self.size_distrib.radii)
 
         # Compute the normalization factor for each size bin
         norm_factors = np.array([[force_jkr(self.surface_energy, r*1e-6),] for r in self.size_distrib.radii])

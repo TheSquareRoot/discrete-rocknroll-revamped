@@ -9,7 +9,7 @@ from .config import setup_logging
 logger = setup_logging(__name__, 'logs/log.log')
 
 
-def biasi_params(*radii) -> tuple:
+def biasi_params(radii) -> tuple:
     """
     Return the log-normal median and spread parameters for an arbitrary number of radii.
     Uses the fit from Biasi (2001).
