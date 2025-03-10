@@ -5,7 +5,7 @@ from numpy.typing import NDArray
 
 from .config import setup_logging
 from .distribution import SizeDistribution
-from .forcemodel import ForceModel
+from .aeromodel import AeroModel
 
 
 # Configure module logger from config file
@@ -68,7 +68,7 @@ class Flow:
 class FlowBuilder:
     def __init__(self,
                  size_distrib: SizeDistribution,
-                 forcemodel: ForceModel,
+                 aeromodel: AeroModel,
                  duration: float,
                  dt: float,
                  target_vel:  float,
@@ -80,7 +80,7 @@ class FlowBuilder:
 
         # Objects
         self.size_distrib = size_distrib
-        self.forcemodel = forcemodel
+        self.aeromodel = aeromodel
 
         # Simulation params
         self.duration = duration
@@ -103,9 +103,9 @@ class FlowBuilder:
             velocity = np.ones_like(time) * self.target_vel
 
         # Compute aerodynamic quantities
-        lift = self.forcemodel.lift(velocity, self.size_distrib.radii)
-        drag = self.forcemodel.drag(velocity, self.size_distrib.radii)
-        burst = self.forcemodel.burst(velocity,)
+        lift = self.aeromodel.lift(velocity, self.size_distrib.radii)
+        drag = self.aeromodel.drag(velocity, self.size_distrib.radii)
+        burst = self.aeromodel.burst(velocity, )
 
         # Instantiate the flow class
         flow = Flow(velocity,

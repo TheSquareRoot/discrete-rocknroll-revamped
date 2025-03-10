@@ -8,7 +8,7 @@ from .config import setup_logging
 logger = setup_logging(__name__, 'logs/log.log')
 
 
-class ForceModel:
+class AeroModel:
     def lift(self,
              velocity: NDArray[np.floating],
              radii: NDArray[np.floating]
@@ -26,7 +26,7 @@ class ForceModel:
              ) -> NDArray[np.floating]:
         pass
 
-class BaseForceModel(ForceModel):
+class BaseAeroModel(AeroModel):
     """
     Estimates lift, drag and the burst frequency for a particle attached to a flat surface in a shear flow.
     All formulas are based on the results of O'Neill (1968) and Hall (1988).

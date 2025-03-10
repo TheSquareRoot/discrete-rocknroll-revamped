@@ -2,7 +2,7 @@ from .check_config import check_config
 from .config import setup_logging
 from .distribution import SizeDistributionBuilder, AdhesionDistributionBuilder
 from .flow import FlowBuilder
-from .forcemodel import BaseForceModel
+from .aeromodel import BaseAeroModel
 from .utils import load_config
 
 
@@ -39,11 +39,11 @@ def run(config_file: str) -> None:
     adh_distrib.plot(0, norm=False, scale='linear')
 
     # Instantiate force model
-    forcemodel = BaseForceModel(config['physics']['density'], config['physics']['viscosity'])
+    aeromodel = BaseAeroModel(config['physics']['density'], config['physics']['viscosity'])
 
     # Build the flow
     logger.info('Generating friction velocity time history...')
-    flow_builder = FlowBuilder(size_distrib, forcemodel, **flow_params)
+    flow_builder = FlowBuilder(size_distrib, aeromodel, **flow_params)
     flow = flow_builder.generate()
     logger.debug(f'Flow generated: {flow}')
 
