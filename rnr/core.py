@@ -16,9 +16,14 @@ def run(config_file: str) -> None:
     logger.info('Checking parameters...')
     check_config(config)
 
+    # Compose the argument dicts for the builders
+    size_params = config['sizedistrib']
+    adh_params = {**config['adhdistrib'], **config['physics']}
+    flow_params = {**config['simulation'], **config['physics']}
+
     # Build the particle size distribution
     logger.info('Generating size distribution...')
-    sizedistrib_builder = SizeDistributionBuilder(**config['sizedistrib'])
+    sizedistrib_builder = SizeDistributionBuilder(**size_params)
     size_distrib = sizedistrib_builder.generate()
     logger.debug(f'Size distribution generated: {size_distrib}')
 
@@ -26,9 +31,7 @@ def run(config_file: str) -> None:
 
     # Build the adhesion force distribution
     logger.info('Generating adhesion distribution...')
-    adhesion_builder = AdhesionDistributionBuilder(size_distrib=size_distrib,
-                                                   surface_energy=config['physics']['surf_energy'],
-                                                   **config['adhdistrib'])
+    adhesion_builder = AdhesionDistributionBuilder(size_distrib=size_distrib, **adh_params)
     adh_distrib = adhesion_builder.generate()
     logger.debug(f'Adhesion distribution generated: {adh_distrib}')
 
@@ -36,9 +39,7 @@ def run(config_file: str) -> None:
 
     # Build the flow
     logger.info('Generating friction velocity time history...')
-    flow_params = {**config['simulation'], **config['physics']}
-    flow_builder = FlowBuilder(size_distrib=size_distrib,
-                               **flow_params)
+    flow_builder = FlowBuilder(size_distrib=size_distrib, **flow_params)
     flow = flow_builder.generate()
 
     flow.plot(scale='linear')
