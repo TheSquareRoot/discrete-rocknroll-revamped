@@ -25,7 +25,7 @@ class SizeDistribution:
 
     def __str__(self) -> str:
         return (
-            f"AdhesionDistribution(\n"
+            f"SizeDistribution(\n"
             f"  modes: {np.shape(self.modes)},\n"
             f"  radii: {np.shape(self.radii)}   - [{self.radii[0]:.2e} ... {self.radii[-1]:.2e}],\n"
             f"  weights: {np.shape(self.weights)} - [{self.weights[0]:.2e} ... {self.weights[-1]:.2e}]\n"

@@ -29,7 +29,7 @@ class Flow:
 
     def __str__(self) -> str:
         return (
-            f"AdhesionDistribution(\n"
+            f"Flow(\n"
             f"  velocity: {np.shape(self.velocity)}   - [{self.velocity[0]:.2e} ... {self.velocity[-1]:.2e}],\n"
             f"  lift: {np.shape(self.lift)} - [{self.lift[0,0]:.2e} ... {self.lift[-1,-1]:.2e}],\n"
             f"  burst: {np.shape(self.burst)} - [{self.burst[0]:.2e} ... {self.burst[-1]:.2e}]\n"
