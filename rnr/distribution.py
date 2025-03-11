@@ -109,6 +109,9 @@ class SizeDistributionBuilder:
             for j in range(self.nmodes):
                 weights[i] += self.weights[j] * normal(rad_domain[i], self.modes[j], self.spreads[j])
 
+        # Normalize weights
+        weights /= np.sum(weights)
+
         # Instantiate the size distribution
         size_distrib = SizeDistribution(np.array(self.modes),
                                         np.array(self.spreads),
@@ -142,6 +145,10 @@ class AdhesionDistribution:
             f"  norm_factors: {np.shape(self.norm_factors)} - [{self.norm_factors[0,0]:.2e} ... {self.norm_factors[-1,-1]:.2e}]\n"
             f")"
         )
+
+    @property
+    def nbins(self,) -> int:
+        return self.weights.shape[1]
 
     @property
     def fadh(self,) -> NDArray[np.floating]:
@@ -201,6 +208,9 @@ class AdhesionDistributionBuilder:
 
             for j in range(self.nbins):
                 weights[i, j] = quad(log_norm, edges[i, j], edges[i, j + 1], args=(medians[i], spreads[i],))[0]
+
+            # Normalize weights
+            weights[i,:] /= weights[i,:].sum()
 
         # Instantiate the adhesion force distribution
         adh_distrib = AdhesionDistribution(weights,
