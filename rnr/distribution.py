@@ -36,6 +36,10 @@ class SizeDistribution:
     def nbins(self,) -> int:
         return len(self.radii)
 
+    @property
+    def radii_meter(self,) -> NDArray[np.floating]:
+        return self.radii * 1e-6
+
     def plot(self, scale: str = 'log', **kwargs) -> None:
         """Basic bar plot of the size distribution."""
         plt.clf()
