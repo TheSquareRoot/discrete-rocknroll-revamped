@@ -55,12 +55,30 @@ class Flow:
     def plot_all(self, i: int, scale: str = 'linear', **kwargs) -> None:
         plt.clf()
 
-        fig, axs = plt.subplots(2,2)
+        # Create subplots
+        fig, axs = plt.subplots(2,2, sharex=True,)
+        axs[1,0].sharey(axs[1,1])
 
-        axs[0,0].plot(self.time, self.velocity, **kwargs)
-        axs[0,1].plot(self.time, self.burst, **kwargs)
-        axs[1,0].plot(self.time, self.lift[i,:], **kwargs)
-        axs[1,1].plot(self.time, self.drag[i,:], **kwargs)
+        # plot all time histories
+        axs[0,0].plot(self.time, self.velocity, color='black', **kwargs)
+        axs[0,1].plot(self.time, self.burst, color='green', **kwargs)
+        axs[1,0].plot(self.time, self.lift[i,:], color='orange',**kwargs)
+        axs[1,1].plot(self.time, self.drag[i,:], color='red', **kwargs)
+
+        # Axis labels
+        axs[0,0].set_ylabel('Friction velocity [m/s]')
+        axs[0,1].set_ylabel('Burst frequency [s-1]')
+        axs[1,0].set_ylabel('Lift [N]')
+        axs[1,1].set_ylabel('Drag [N]')
+
+        # Setting shared properties
+        for ax in axs.flat:
+            # Limits
+            ax.set_xlim(left=0, right=self.time[-1])
+            ax.set_ylim(bottom=0)
+
+            # Grids
+            ax.grid(True)
 
         plt.savefig('figs/all_aero_forces.png', dpi=300)
 
@@ -103,8 +121,8 @@ class FlowBuilder:
             velocity = np.ones_like(time) * self.target_vel
 
         # Compute aerodynamic quantities
-        lift = self.aeromodel.lift(velocity, self.size_distrib.radii)
-        drag = self.aeromodel.drag(velocity, self.size_distrib.radii)
+        lift = self.aeromodel.lift(velocity, self.size_distrib.radii_meter)
+        drag = self.aeromodel.drag(velocity, self.size_distrib.radii_meter)
         burst = self.aeromodel.burst(velocity, )
 
         # Instantiate the flow class
