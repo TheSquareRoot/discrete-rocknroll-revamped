@@ -40,8 +40,8 @@ class BaseAeroModel(AeroModel):
              radii: NDArray[np.floating]
              ) -> NDArray[np.floating]:
         # Reshape for broadcasting
-        velocity = velocity.reshape(1, -1)
-        radii = radii.reshape(-1, 1)
+        velocity = velocity.reshape(-1, 1)
+        radii = radii.reshape(1, -1)
 
         return 20.9 * self.density * (self.viscosity ** 2) * ((radii * velocity / self.viscosity) ** 2.31)
 
@@ -50,8 +50,8 @@ class BaseAeroModel(AeroModel):
              radii: NDArray[np.floating]
              ) -> NDArray[np.floating]:
         # Reshape for broadcasting
-        velocity = velocity.reshape(1, -1)
-        radii = radii.reshape(-1, 1)
+        velocity = velocity.reshape(-1, 1)
+        radii = radii.reshape(1, -1)
 
         return 32.0 * self.density * (self.viscosity ** 2) * ((radii * velocity / self.viscosity) ** 2)
 

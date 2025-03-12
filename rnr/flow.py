@@ -32,6 +32,7 @@ class Flow:
             f"Flow(\n"
             f"  velocity: {np.shape(self.velocity)}   - [{self.velocity[0]:.2e} ... {self.velocity[-1]:.2e}],\n"
             f"  lift: {np.shape(self.lift)} - [{self.lift[0,0]:.2e} ... {self.lift[-1,-1]:.2e}],\n"
+            f"  drag: {np.shape(self.drag)} - [{self.drag[0,0]:.2e} ... {self.drag[-1,-1]:.2e}],\n"
             f"  burst: {np.shape(self.burst)} - [{self.burst[0]:.2e} ... {self.burst[-1]:.2e}]\n"
             f")"
         )
@@ -39,6 +40,10 @@ class Flow:
     @property
     def nsteps(self,) -> int:
         return len(self.time)
+
+    @property
+    def faero(self,) -> NDArray[np.floating]:
+        return 0.5 * self.lift + 100 * self.drag
 
     def plot(self, scale: str = 'linear', **kwargs) -> None:
         plt.clf()
@@ -61,8 +66,8 @@ class Flow:
         # plot all time histories
         axs[0,0].plot(self.time, self.velocity, color='black', **kwargs)
         axs[0,1].plot(self.time, self.burst, color='green', **kwargs)
-        axs[1,0].plot(self.time, self.lift[i,:], color='orange',**kwargs)
-        axs[1,1].plot(self.time, self.drag[i,:], color='red', **kwargs)
+        axs[1,0].plot(self.time, self.lift[:,i], color='orange',**kwargs)
+        axs[1,1].plot(self.time, self.drag[:,i], color='red', **kwargs)
 
         # Axis labels
         axs[0,0].set_ylabel('Friction velocity [m/s]')
