@@ -1,8 +1,11 @@
 from .check_config import check_config
 from .config import setup_logging
+
+from .aeromodel import BaseAeroModel
 from .distribution import SizeDistributionBuilder, AdhesionDistributionBuilder
 from .flow import FlowBuilder
-from .aeromodel import BaseAeroModel
+from .results import Results
+from .simulation import Simulation
 from .utils import load_config
 
 
@@ -48,3 +51,12 @@ def run(config_file: str) -> None:
     logger.debug(f'Flow generated: {flow}')
 
     flow.plot_all(0)
+
+    # Build a simulation and run it
+    logger.info('Running simulation...')
+    sim = Simulation(size_distrib, adh_distrib, flow)
+    res = sim.run()
+    logger.info('Done.')
+
+    res.plot_distribution(0)
+    res.plot_distribution(90)
