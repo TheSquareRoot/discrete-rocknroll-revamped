@@ -60,3 +60,5 @@ def run(config_file: str) -> None:
 
     res.plot_distribution(0)
     res.plot_distribution(90)
+    res.plot_remaining_fraction()
+    res.plot_instant_rate()

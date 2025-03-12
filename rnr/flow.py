@@ -36,7 +36,6 @@ class Flow:
             f")"
         )
 
-
     @property
     def nsteps(self,) -> int:
         return len(self.time)

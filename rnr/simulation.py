@@ -25,12 +25,10 @@ class Simulation:
 
     def run(self,):
         # Build population array
-        counts = np.zeros([self.flow.nsteps + 1, self.size_distrib.nbins, self.adh_distrib.nbins])
+        counts = np.zeros([self.flow.nsteps, self.size_distrib.nbins, self.adh_distrib.nbins])
         counts[0,:,:] = self.size_distrib.weights[:, None] * self.adh_distrib.weights
 
-        rate = np.ones_like(counts) * 0.1
-
-        for i in range(self.flow.nsteps):
+        for i in range(self.flow.nsteps-1):
             counts[i+1,:,:] = counts[i,:,:] * 0.9
 
         res = Results(self.adh_distrib,
