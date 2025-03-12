@@ -5,6 +5,7 @@ from numpy.typing import NDArray
 from .config import setup_logging
 from .distribution import AdhesionDistribution, SizeDistribution
 from .flow import Flow
+from .model import rocknroll_model
 from .results import Results
 
 
@@ -28,8 +29,11 @@ class Simulation:
         counts = np.zeros([self.flow.nsteps, self.size_distrib.nbins, self.adh_distrib.nbins])
         counts[0,:,:] = self.size_distrib.weights[:, None] * self.adh_distrib.weights
 
-        for i in range(self.flow.nsteps-1):
-            counts[i+1,:,:] = counts[i,:,:] * 0.9
+        rate = rocknroll_model(self.size_distrib, self.adh_distrib, self.flow)
+        dt = self.flow.time[1] - self.flow.time[0]
+
+        for t in range(self.flow.nsteps-1):
+            counts[t+1,:,:] = np.maximum(counts[t,:,:] * (1 - rate[t,:,:] * dt), 0)
 
         res = Results(self.adh_distrib,
                       self.size_distrib,

@@ -121,10 +121,10 @@ class SizeDistributionBuilder:
         return size_distrib
 
     def generate(self,) -> SizeDistribution:
-        if hasattr(self, 'spreads'):
-            return self._generate_with_spread()
-        else:
+        if any(x == 0 for x in self.spreads):
             return self._generate_no_spread()
+        else:
+            return self._generate_with_spread()
 
 
 class AdhesionDistribution:

@@ -58,7 +58,6 @@ def run(config_file: str) -> None:
     res = sim.run()
     logger.info('Done.')
 
-    res.plot_distribution(0)
-    res.plot_distribution(90)
-    res.plot_remaining_fraction()
+    res.plot_resuspended_fraction()
     res.plot_instant_rate()
+    print(1-res.resuspended_fraction[-1])
