@@ -5,7 +5,13 @@ from numpy.typing import NDArray
 from scipy.integrate import quad
 
 from .config import setup_logging
-from .utils import biasi_params, force_jkr, force_rabinovich, log_norm, normal
+from .utils import (biasi_params,
+                    force_jkr,
+                    force_rabinovich,
+                    log_norm,
+                    normal,
+                    median
+                    )
 
 
 # Configure module logger from config file
@@ -165,6 +171,12 @@ class AdhesionDistribution:
         """Return a denormalized adhesion force array"""
         return self.fadh_norm * self.norm_factors
 
+    def median(self, i: int, norm: bool = True,) -> float:
+        if norm:
+            return median(self.fadh_norm[i], self.weights[i])
+        else:
+            return median(self.fadh[i], self.weights[i])
+
     def plot(self, i: int, norm: bool = True, scale: str = 'log', **kwargs) -> None:
         fig, ax = plt.subplots(figsize=(6, 4))
 
@@ -175,8 +187,13 @@ class AdhesionDistribution:
             ax.plot(self.fadh[i], self.weights[i], **kwargs)
             ax.set_xlabel('Adhesion force [N]')
 
+        # Compute the median and display it
+        med = self.median(i, norm=norm)
+        ax.axvline(med, color='r', linestyle='-')
+
         # Set scale
         ax.set_xscale(scale)
+        ax.set_ylim(bottom=0)
 
         fig.tight_layout()
 
