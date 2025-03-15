@@ -1,6 +1,3 @@
-import toml
-import sys
-
 import numpy as np
 
 from .config import setup_logging
@@ -25,19 +22,6 @@ def biasi_params(radii) -> tuple:
 def force_jkr(surface_energy: float, radius: float) -> float:
     """Adhesion force of a spherical particle on a flat surface according to JKR theory."""
     return 1.5 * np.pi * surface_energy * radius
-
-
-def load_config(file_path: str) -> dict:
-    try:
-        with open(file_path, "r") as file:
-            logger.info(f"Loading configuration from {file_path}")
-            return toml.load(file)
-    except FileNotFoundError:
-        logger.error(f"Error: Configuration file '{file_path}' not found.")
-        sys.exit(1)
-    except toml.TomlDecodeError as e:
-        logger.error(f"Error: Failed to parse '{file_path}': {e}", file=sys.stderr)
-        sys.exit(1)
 
 
 def log_norm(x: float, mean: float, stdv: float) -> float:
