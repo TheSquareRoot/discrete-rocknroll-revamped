@@ -171,12 +171,25 @@ class AdhesionDistribution:
         """Return a denormalized adhesion force array"""
         return self.fadh_norm * self.norm_factors
 
+    # Some statistical quantities
     def median(self, i: int, norm: bool = True,) -> float:
         if norm:
             return median(self.fadh_norm[i], self.weights[i])
         else:
             return median(self.fadh[i], self.weights[i])
 
+    def mean(self, i: int, norm: bool = True) -> float:
+        if norm:
+            return float(np.average(self.fadh_norm[i], weights=self.weights[i]))
+        else:
+            return float(np.average(self.fadh[i], weights=self.weights[i]))
+
+    def geo_spread(self, i: int, norm: bool = True) -> float:
+        mean, med = self.mean(i, norm=norm), self.median(i, norm=norm)
+
+        return np.exp(np.sqrt(2 * np.log(mean / med)))
+
+    # Plotting functions
     def plot(self, i: int, norm: bool = True, scale: str = 'log', **kwargs) -> None:
         fig, ax = plt.subplots(figsize=(6, 4))
 
@@ -189,7 +202,10 @@ class AdhesionDistribution:
 
         # Compute the median and display it
         med = self.median(i, norm=norm)
+        mean = self.mean(i, norm=norm)
+
         ax.axvline(med, color='r', linestyle='-')
+        ax.axvline(mean, color='r', linestyle='--')
 
         # Set scale
         ax.set_xscale(scale)
