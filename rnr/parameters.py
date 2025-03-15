@@ -29,7 +29,7 @@ def check_config(config):
     config["sizedistrib"]["nmodes"] = len(config["sizedistrib"]["modes"])
 
     # If biasi params are selected, user should not define custom median and scatter values
-    if config["adhdistrib"]["params"] == "biasi":
+    if config["adhdistrib"]["dist_params"] == "biasi":
         if (config["adhdistrib"]["medians"] is not None) or (config["distribution"]["spreads"] is not None):
             logger.warning("Biasi parameters selected. Custom median and scatter parameters will be ignored.")
 

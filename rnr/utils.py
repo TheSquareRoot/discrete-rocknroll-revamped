@@ -13,16 +13,19 @@ def biasi_params(radii) -> tuple:
 
     NOTE: radii are in microns.
     """
-    medians = [0.016 - 0.0023 * (r ** 0.545) for r in radii]
-    spreads = [1.8 + 0.136 * (r ** 1.4) for r in radii]
+    medians = np.array([0.016 - 0.0023 * (r ** 0.545) for r in radii])
+    spreads = np.array([1.8 + 0.136 * (r ** 1.4) for r in radii])
 
     return medians, spreads
 
 
-def force_jkr(surface_energy: float, radius: float) -> float:
+def force_jkr(radius: float, surface_energy: float,) -> float:
     """Adhesion force of a spherical particle on a flat surface according to JKR theory."""
     return 1.5 * np.pi * surface_energy * radius
 
+def force_rabinovich(radius: float, asperity_radius: float, peaktopeak: float) -> float:
+    """Adhesion force of a spherical particle on a rough surface according to the Rabinovich model."""
+    pass
 
 def log_norm(x: float, mean: float, stdv: float) -> float:
     """Log normal PDF. Geometric parameters are used."""

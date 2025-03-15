@@ -5,7 +5,7 @@ from numpy.typing import NDArray
 from scipy.integrate import quad
 
 from .config import setup_logging
-from .utils import biasi_params, force_jkr, log_norm, normal
+from .utils import biasi_params, force_jkr, force_rabinovich, log_norm, normal
 
 
 # Configure module logger from config file
@@ -35,6 +35,10 @@ class SizeDistribution:
     @property
     def nbins(self,) -> int:
         return len(self.radii)
+
+    @property
+    def nmodes(self,) -> int:
+        return len(self.modes)
 
     @property
     def radii_meter(self,) -> NDArray[np.floating]:
@@ -185,14 +189,59 @@ class AdhesionDistributionBuilder:
                  size_distrib: SizeDistribution,
                  nbins: int,
                  fmax: float,
-                 surface_energy: float,
+                 dist_params: str,
+                 adhesion_model: str,
+                 means: list[float] = None,
+                 spreads: list[float] = None,
+                 surface_energy: float = None,
+                 asperity_radius: float = None,
+                 peaktopeak: float = None,
                  **kwargs,
                  ) -> None:
 
         self.size_distrib = size_distrib
         self.nbins = nbins
         self.fmax = fmax
+        self.dist_params = dist_params
+        self.means = means
+        self.spreads = spreads
+
+        self.adhesion_model = adhesion_model
         self.surface_energy = surface_energy
+        self.asperity_radius = asperity_radius
+        self.peaktopeak = peaktopeak
+
+    def _compute_distribution_params(self, radii: NDArray[np.floating],) -> tuple:
+        """Wrapper to set the correct distribution means and spreads."""
+        if self.dist_params == 'biasi':
+            return biasi_params(radii,)
+        elif self.dist_params == 'custom':
+            # Distinguish between the spread and no spread case.
+            # If there is a radius spread, it is unlikely the user will provide means and spreads for each size bin
+            # So instead, values have to be derived from the uer inputs.
+            if len(self.means) != self.size_distrib.nbins:
+                return self.means, self.spreads
+            else:
+                # If only set of parameters is used, it is applied to all size bins
+                if len(self.means) == 1:
+                    return (np.ones(self.size_distrib.nbins) * self.means[0],
+                            np.ones(self.size_distrib.nbins) * self.means[0])
+                elif len(self.means) == self.size_distrib.nmodes:
+                    #TODO: implement what happens when a set of parameters are provided for each mode
+                    pass
+                else:
+                    raise ValueError(f'Inccorrect number of parameters provided: {len(self.means)}')
+        else:
+            raise ValueError(f'Unknown distribution parameter {self.dist_params}')
+
+    def _compute_norm_factor(self, radius: float,) -> float:
+        """Wrapper to call the correct adhesion force function."""
+        if self.adhesion_model == 'JKR':
+            return force_jkr(radius, self.surface_energy,)
+        elif self.adhesion_model == 'Rabinovich':
+            return force_rabinovich(radius, self.asperity_radius, self.peaktopeak,)
+        else:
+            raise ValueError(f"Unknown adhesion model: {self.adhesion_model}")
 
     def generate(self,) -> AdhesionDistribution:
         """
@@ -205,10 +254,13 @@ class AdhesionDistributionBuilder:
         weights = np.empty_like(fadh_norm)
 
         # Get the log-normal median and spread parameters
-        medians, spreads = biasi_params(self.size_distrib.radii)
+        medians, spreads = self._compute_distribution_params(self.size_distrib.radii)
 
         # Compute the normalization factor for each size bin
-        norm_factors = np.array([[force_jkr(self.surface_energy, r*1e-6),] for r in self.size_distrib.radii])
+        norm_factors = np.array([
+            [self._compute_norm_factor(r*1e-6),]
+            for r in self.size_distrib.radii
+        ])
 
         for i in range(self.size_distrib.nbins):
             edges[i,:] = np.linspace(0.0, medians[i]*self.fmax, self.nbins + 1)

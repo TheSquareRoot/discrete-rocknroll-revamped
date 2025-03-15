@@ -2,7 +2,7 @@
 nbins   = 100
 fmax = 2.0
 
-params  = 'biasi'
+dist_params  = 'biasi'
 medians = [ 1.0, 1.0 ]
 spreads = [ 1.0, 1.0 ]
 
