@@ -42,19 +42,21 @@ class Flow:
         return len(self.time)
 
     def plot(self, scale: str = 'linear', **kwargs) -> None:
-        plt.clf()
-        plt.plot(self.time, self.velocity, **kwargs)
+        fig, ax = plt.subplots(figsize=(6, 4))
 
-        plt.xscale(scale)
+        ax.plot(self.time, self.velocity, **kwargs)
 
-        plt.xlabel('Time [s]')
-        plt.ylabel('Friction velocity [m/s]')
+        ax.set_xscale(scale)
 
-        plt.savefig('figs/velocity.png', dpi=300)
+        ax.set_xlabel('Time [s]')
+        ax.set_ylabel('Friction velocity [m/s]')
+
+        fig.tight_layout()
+
+        fig.savefig('figs/velocity.png', dpi=300)
+        plt.close(fig)
 
     def plot_all(self, i: int, scale: str = 'linear', **kwargs) -> None:
-        plt.clf()
-
         # Create subplots
         fig, axs = plt.subplots(2,2, sharex=True,)
         axs[1,0].sharey(axs[1,1])
@@ -80,7 +82,10 @@ class Flow:
             # Grids
             ax.grid(True)
 
-        plt.savefig('figs/all_aero_forces.png', dpi=300)
+        fig.tight_layout()
+
+        fig.savefig('figs/all_aero_forces.png', dpi=300)
+        plt.close(fig)
 
 
 class FlowBuilder:

@@ -42,16 +42,22 @@ class SizeDistribution:
 
     def plot(self, scale: str = 'log', **kwargs) -> None:
         """Basic bar plot of the size distribution."""
-        plt.clf()
+        fig, ax = plt.subplots(figsize=(6, 4))
 
-        plt.bar(self.radii, self.weights, **kwargs)
+        ax.bar(self.radii, self.weights, **kwargs)
 
-        plt.xscale(scale)
-        plt.ylim([0.0, 1.1*np.max(self.weights)])
+        ax.set_xscale(scale)
+        ax.set_ylim([0.0, 1.1*np.max(self.weights)])
 
-        plt.grid()
+        ax.set_xlabel('radius [µm]')
+        ax.set_ylabel('weight')
 
-        plt.savefig('figs/size_distrib.png', dpi=300)
+        ax.grid(True)
+
+        fig.tight_layout()
+
+        fig.savefig('figs/size_distrib.png', dpi=300)
+        plt.close(fig)
 
 
 class SizeDistributionBuilder:
@@ -156,19 +162,22 @@ class AdhesionDistribution:
         return self.fadh_norm * self.norm_factors
 
     def plot(self, i: int, norm: bool = True, scale: str = 'log', **kwargs) -> None:
-        plt.clf()
+        fig, ax = plt.subplots(figsize=(6, 4))
 
         if norm:
-            plt.plot(self.fadh_norm[i], self.weights[i], **kwargs)
-            plt.xlabel('Normalized adhesion force')
+            ax.plot(self.fadh_norm[i], self.weights[i], **kwargs)
+            ax.set_xlabel('Normalized adhesion force')
         else:
-            plt.plot(self.fadh[i], self.weights[i], **kwargs)
-            plt.xlabel('Adhesion force [N]')
+            ax.plot(self.fadh[i], self.weights[i], **kwargs)
+            ax.set_xlabel('Adhesion force [N]')
 
         # Set scale
-        plt.xscale(scale)
+        ax.set_xscale(scale)
 
-        plt.savefig("figs/adh_distrib.png", dpi=300)
+        fig.tight_layout()
+
+        fig.savefig("figs/adh_distrib.png", dpi=300)
+        plt.close(fig)
 
 
 class AdhesionDistributionBuilder:
