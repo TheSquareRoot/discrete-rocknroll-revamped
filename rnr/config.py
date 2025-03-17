@@ -1,3 +1,4 @@
+import argparse
 import logging
 from logging import StreamHandler
 
@@ -33,3 +34,20 @@ def setup_logging(name, log_file):
     console_handler.setFormatter(console_formatter)
 
     return logger
+
+def setup_parsing():
+    # Define parser
+    parser = argparse.ArgumentParser()
+
+    # Add CLi arguments to the parser
+    parser.add_argument('-c','--config',
+                        help='name of the configuration file',
+                        type=str,)
+    parser.add_argument('-r','--single-run',
+                        help='run a single simulation from the config file',
+                        action='store_true',)
+    parser.add_argument('-f','--fraction-velocity',
+                        help='plot the fraction-velocity curve',
+                        action='store_true',)
+
+    return parser
