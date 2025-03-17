@@ -31,7 +31,7 @@ class BaseAeroModel(AeroModel):
     Estimates lift, drag and the burst frequency for a particle attached to a flat surface in a shear flow.
     All formulas are based on the results of O'Neill (1968) and Hall (1988).
     """
-    def __init__(self, density: float, viscosity: float) -> None:
+    def __init__(self, density: float, viscosity: float, **kwargs) -> None:
         self.density = density
         self.viscosity = viscosity
 

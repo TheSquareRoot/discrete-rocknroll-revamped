@@ -1,3 +1,6 @@
+import matplotlib.pyplot as plt
+import numpy as np
+
 from .check_config import check_config
 from .config import setup_logging
 
@@ -11,6 +14,41 @@ from .utils import load_config
 
 logger = setup_logging(__name__, 'logs/log.log')
 
+def _build_distribs(size_params, adh_params, plot=False,):
+    # Build the particle size distribution
+    logger.info('Generating size distribution...')
+    sizedistrib_builder = SizeDistributionBuilder(**size_params)
+    size_distrib = sizedistrib_builder.generate()
+    logger.debug(f'Size distribution generated: {size_distrib}')
+
+    # Build the adhesion force distribution
+    logger.info('Generating adhesion distribution...')
+    adhesion_builder = AdhesionDistributionBuilder(size_distrib, **adh_params)
+    adh_distrib = adhesion_builder.generate()
+    logger.debug(f'Adhesion distribution generated: {adh_distrib}')
+
+    # Plot the distributions if the user requested
+    if plot:
+        size_distrib.plot(scale='linear')
+        adh_distrib.plot(0, norm=False, scale='linear')
+
+    return size_distrib, adh_distrib
+
+def _build_flow(size_distrib, flow_params, plot=False):
+    # Instantiate force model
+    aeromodel = BaseAeroModel(**flow_params)
+
+    # Build the flow
+    logger.info('Generating friction velocity time history...')
+    flow_builder = FlowBuilder(size_distrib, aeromodel, **flow_params)
+    flow = flow_builder.generate()
+    logger.debug(f'Flow generated: {flow}')
+
+    # Plot the time histories if requested
+    if plot:
+        flow.plot_all(0)
+
+    return flow
 
 def run(config_file: str) -> None:
     # Load config file
@@ -25,32 +63,9 @@ def run(config_file: str) -> None:
     adh_params = {**config['adhdistrib'], **config['physics']}
     flow_params = {**config['simulation'], **config['physics']}
 
-    # Build the particle size distribution
-    logger.info('Generating size distribution...')
-    sizedistrib_builder = SizeDistributionBuilder(**size_params)
-    size_distrib = sizedistrib_builder.generate()
-    logger.debug(f'Size distribution generated: {size_distrib}')
-
-    size_distrib.plot(scale='linear')
-
-    # Build the adhesion force distribution
-    logger.info('Generating adhesion distribution...')
-    adhesion_builder = AdhesionDistributionBuilder(size_distrib, **adh_params)
-    adh_distrib = adhesion_builder.generate()
-    logger.debug(f'Adhesion distribution generated: {adh_distrib}')
-
-    adh_distrib.plot(0, norm=False, scale='linear')
-
-    # Instantiate force model
-    aeromodel = BaseAeroModel(config['physics']['density'], config['physics']['viscosity'])
-
-    # Build the flow
-    logger.info('Generating friction velocity time history...')
-    flow_builder = FlowBuilder(size_distrib, aeromodel, **flow_params)
-    flow = flow_builder.generate()
-    logger.debug(f'Flow generated: {flow}')
-
-    flow.plot_all(0)
+    # Build the distributions and the flow
+    size_distrib, adh_distrib = _build_distribs(size_params, adh_params, plot=True)
+    flow = _build_flow(size_distrib, flow_params, plot=True)
 
     # Build a simulation and run it
     logger.info('Running simulation...')
@@ -60,4 +75,51 @@ def run(config_file: str) -> None:
 
     res.plot_resuspended_fraction()
     res.plot_instant_rate()
-    print(1-res.resuspended_fraction[-1])
+
+def fraction_velocity_curve(config_file: str) -> None:
+    # Load config file
+    config = load_config(f"configs/{config_file}.toml")
+
+    # Check the values from the config file
+    logger.info('Checking parameters...')
+    check_config(config)
+
+    # Compose the argument dicts for the builders
+    size_params = config['sizedistrib']
+    adh_params = {**config['adhdistrib'], **config['physics']}
+
+    # Build the distributions
+    size_distrib, adh_distrib = _build_distribs(size_params, adh_params, plot=False)
+
+    # Generate a range of velocities to build the validation fraction-velocity curve
+    target_velocities = np.logspace(np.log10(0.1), np.log10(10), 40)
+    fraction = np.zeros_like(target_velocities)
+    flow_params = {**config['simulation'], **config['physics']}
+
+    for i in range(target_velocities.shape[0]):
+        # Generate a flow with the given target velocity
+        flow_params['target_vel'] = target_velocities[i]
+        flow = _build_flow(size_distrib, flow_params, plot=False)
+
+        # Run the simulation
+        logger.info(f'Running simulation {i+1}/{target_velocities.shape[0]}...')
+        sim = Simulation(size_distrib, adh_distrib, flow)
+        res = sim.run()
+        logger.info('Done.')
+
+        # Store the final fraction
+        fraction[i] = 1 - res.resuspended_fraction[-1]
+
+    # Evaluate integral
+    print(np.trapezoid(fraction, target_velocities))
+
+    # Plot
+    plt.clf()
+    plt.plot(target_velocities, fraction)
+    plt.xscale('log')
+    plt.ylim(0, 1.1)
+
+    plt.grid(axis='x', which='both')
+    plt.grid(axis='y', which='major')
+
+    plt.savefig('figs/validation.png', dpi=300)
