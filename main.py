@@ -1,5 +1,5 @@
-from rnr.config import setup_logging, setup_parsing
-from rnr.core import run, fraction_velocity_curve
+from rnr.utils.config import setup_logging, setup_parsing
+from rnr.simulation.scripts import run, fraction_velocity_curve
 
 logger = setup_logging(__name__, 'logs/log.log')
 

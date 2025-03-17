@@ -44,7 +44,7 @@ def setup_parsing():
                         help='name of the configuration file',
                         type=str,)
     parser.add_argument('-r','--single-run',
-                        help='run a single simulation from the config file',
+                        help='run a single simulation from the utils file',
                         action='store_true',)
     parser.add_argument('-f','--fraction-velocity',
                         help='plot the fraction-velocity curve',

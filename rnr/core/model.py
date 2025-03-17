@@ -1,13 +1,12 @@
-import matplotlib.pyplot as plt
 import numpy as np
 from scipy.special import erf
 
-from .config import setup_logging
-from .distribution import AdhesionDistribution, SizeDistribution
-from .flow import Flow
+from rnr.utils.config import setup_logging
+from rnr.core.distribution import AdhesionDistribution, SizeDistribution
+from rnr.core.flow import Flow
 
 
-# Configure module logger from config file
+# Configure module logger from utils file
 logger = setup_logging(__name__, 'logs/log.log')
 
 

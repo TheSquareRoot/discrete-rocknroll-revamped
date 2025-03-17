@@ -4,7 +4,7 @@ import toml
 from .config import setup_logging
 
 
-# Configure module logger from config file
+# Configure module logger from utils file
 logger = setup_logging(__name__, 'logs/log.log')
 
 

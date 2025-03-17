@@ -1,15 +1,13 @@
 import numpy as np
 
-from numpy.typing import NDArray
-
-from .config import setup_logging
-from .distribution import AdhesionDistribution, SizeDistribution
-from .flow import Flow
-from .model import rocknroll_model
-from .results import Results
+from rnr.utils.config import setup_logging
+from rnr.core.distribution import AdhesionDistribution, SizeDistribution
+from rnr.core.flow import Flow
+from rnr.core.model import rocknroll_model
+from rnr.postproc.results import Results
 
 
-# Configure module logger from config file
+# Configure module logger from utils file
 logger = setup_logging(__name__, 'logs/log.log')
 
 

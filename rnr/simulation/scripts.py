@@ -1,14 +1,13 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from .config import setup_logging
-from .parameters import check_config, load_config
+from rnr.utils.config import setup_logging
+from rnr.utils.parameters import check_config, load_config
 
-from .aeromodel import BaseAeroModel
-from .distribution import SizeDistributionBuilder, AdhesionDistributionBuilder
-from .flow import FlowBuilder
-from .results import Results
-from .simulation import Simulation
+from rnr.core.aeromodel import BaseAeroModel
+from rnr.core.distribution import SizeDistributionBuilder, AdhesionDistributionBuilder
+from rnr.core.flow import FlowBuilder
+from rnr.simulation.simulation import Simulation
 
 
 logger = setup_logging(__name__, 'logs/log.log')
@@ -50,10 +49,10 @@ def _build_flow(size_distrib, flow_params, plot=False):
     return flow
 
 def run(config_file: str) -> None:
-    # Load config file
+    # Load utils file
     config = load_config(f"configs/{config_file}.toml")
 
-    # Check the values from the config file
+    # Check the values from the utils file
     logger.info('Checking parameters...')
     check_config(config)
 
@@ -76,10 +75,10 @@ def run(config_file: str) -> None:
     res.plot_instant_rate()
 
 def fraction_velocity_curve(config_file: str) -> None:
-    # Load config file
+    # Load utils file
     config = load_config(f"configs/{config_file}.toml")
 
-    # Check the values from the config file
+    # Check the values from the utils file
     logger.info('Checking parameters...')
     check_config(config)
 

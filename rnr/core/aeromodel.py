@@ -2,9 +2,9 @@ import numpy as np
 
 from numpy.typing import NDArray
 
-from .config import setup_logging
+from rnr.utils.config import setup_logging
 
-# Configure module logger from config file
+# Configure module logger from utils file
 logger = setup_logging(__name__, 'logs/log.log')
 
 

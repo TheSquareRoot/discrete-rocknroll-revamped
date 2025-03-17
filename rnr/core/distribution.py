@@ -4,17 +4,17 @@ import numpy as np
 from numpy.typing import NDArray
 from scipy.integrate import quad
 
-from .config import setup_logging
-from .utils import (biasi_params,
-                    force_jkr,
-                    force_rabinovich,
-                    log_norm,
-                    normal,
-                    median
-                    )
+from rnr.utils.config import setup_logging
+from rnr.utils.misc import (biasi_params,
+                           force_jkr,
+                           force_rabinovich,
+                           log_norm,
+                           normal,
+                           median
+                           )
 
 
-# Configure module logger from config file
+# Configure module logger from utils file
 logger = setup_logging(__name__, 'logs/log.log')
 
 
@@ -109,7 +109,7 @@ class SizeDistributionBuilder:
 
     def _generate_with_spread(self,) -> SizeDistribution:
         """
-        Generate a particle size distribution from the parameters loaded from the config file.
+        Generate a particle size distribution from the parameters loaded from the utils file.
         The result is a composite of normal distributions.
         """
         # TODO: integrate the normal distribution to compute the weights
@@ -281,7 +281,7 @@ class AdhesionDistributionBuilder:
 
     def generate(self,) -> AdhesionDistribution:
         """
-        Generate an adhesion force distribution from the parameters loaded from the config file.
+        Generate an adhesion force distribution from the parameters loaded from the utils file.
         A log-normal distribution is assumed for each size bin.
         """
         # Initialize arrays

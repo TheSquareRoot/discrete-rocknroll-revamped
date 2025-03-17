@@ -3,12 +3,12 @@ import numpy as np
 
 from numpy.typing import NDArray
 
-from .config import setup_logging
-from .distribution import SizeDistribution
-from .aeromodel import AeroModel
+from rnr.utils.config import setup_logging
+from rnr.core.distribution import SizeDistribution
+from rnr.core.aeromodel import AeroModel
 
 
-# Configure module logger from config file
+# Configure module logger from utils file
 logger = setup_logging(__name__, 'logs/log.log')
 
 
