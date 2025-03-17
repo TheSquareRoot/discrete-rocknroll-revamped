@@ -1,7 +1,6 @@
-import toml
-import sys
-
 import numpy as np
+
+from numpy.typing import NDArray
 
 from .config import setup_logging
 
@@ -16,29 +15,19 @@ def biasi_params(radii) -> tuple:
 
     NOTE: radii are in microns.
     """
-    medians = [0.016 - 0.0023 * (r ** 0.545) for r in radii]
-    spreads = [1.8 + 0.136 * (r ** 1.4) for r in radii]
+    medians = np.array([0.016 - 0.0023 * (r ** 0.545) for r in radii])
+    spreads = np.array([1.8 + 0.136 * (r ** 1.4) for r in radii])
 
     return medians, spreads
 
 
-def force_jkr(surface_energy: float, radius: float) -> float:
+def force_jkr(radius: float, surface_energy: float,) -> float:
     """Adhesion force of a spherical particle on a flat surface according to JKR theory."""
     return 1.5 * np.pi * surface_energy * radius
 
-
-def load_config(file_path: str) -> dict:
-    try:
-        with open(file_path, "r") as file:
-            logger.info(f"Loading configuration from {file_path}")
-            return toml.load(file)
-    except FileNotFoundError:
-        logger.error(f"Error: Configuration file '{file_path}' not found.")
-        sys.exit(1)
-    except toml.TomlDecodeError as e:
-        logger.error(f"Error: Failed to parse '{file_path}': {e}", file=sys.stderr)
-        sys.exit(1)
-
+def force_rabinovich(radius: float, asperity_radius: float, peaktopeak: float) -> float:
+    """Adhesion force of a spherical particle on a rough surface according to the Rabinovich model."""
+    pass
 
 def log_norm(x: float, mean: float, stdv: float) -> float:
     """Log normal PDF. Geometric parameters are used."""
@@ -53,3 +42,25 @@ def normal(x: float, mean: float, stdv: float) -> float:
     proba_density = np.exp(-(x - mean) ** 2 / (2 * (stdv ** 2))) / np.sqrt(2 * np.pi * (stdv ** 2))
 
     return proba_density
+
+def median(values: NDArray, freqs: NDArray) -> float:
+    # Compute total count and cumulative sum of frequencies
+    total_count = np.sum(freqs)
+    cum_freq = np.cumsum(freqs)
+
+    # Find the bin index where cumulative frequency exceeds half the total count
+    median_bin_idx = np.searchsorted(cum_freq, total_count / 2)
+
+    # Interpolate the median within that bin
+    if median_bin_idx == 0:
+        med = values[0]  # If median is in the first bin, return its value
+    else:
+        bin_start = values[median_bin_idx - 1]  # Lower bin value
+        bin_end = values[median_bin_idx]  # Upper bin value
+        freq_below = cum_freq[median_bin_idx - 1]  # Cumulative freq below bin
+        freq_in_bin = freqs[median_bin_idx]  # Frequency of the median bin
+
+        # Linear interpolation formula
+        med = bin_start + (bin_end - bin_start) * ((total_count / 2 - freq_below) / freq_in_bin)
+
+    return med

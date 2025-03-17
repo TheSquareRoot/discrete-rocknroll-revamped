@@ -1,15 +1,14 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from .check_config import check_config
 from .config import setup_logging
+from .parameters import check_config, load_config
 
 from .aeromodel import BaseAeroModel
 from .distribution import SizeDistributionBuilder, AdhesionDistributionBuilder
 from .flow import FlowBuilder
 from .results import Results
 from .simulation import Simulation
-from .utils import load_config
 
 
 logger = setup_logging(__name__, 'logs/log.log')
