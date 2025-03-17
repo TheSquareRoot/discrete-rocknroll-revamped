@@ -1,0 +1,29 @@
+[adhdistrib]
+nbins   = 1000
+fmax = 20.0
+
+dist_params  = 'biasi'
+medians = [ 1.0, 1.0 ]
+spreads = [ 1.0, 1.0 ]
+
+[sizedistrib]
+nbins = 50
+width = 3.0
+
+modes   = [ 5.0, ]
+spreads = [ 0.0, ]
+weights = [ 1.0, ]
+
+[simulation]
+duration = 1.0
+dt = 1e-3
+
+target_vel = 0.9
+acc_time = 0.0
+
+[physics]
+adhesion_model = 'JKR'
+
+density = 1.92
+viscosity = 1.96e-5
+surface_energy = 0.56
