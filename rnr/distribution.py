@@ -171,7 +171,7 @@ class AdhesionDistribution:
         """Return a denormalized adhesion force array"""
         return self.fadh_norm * self.norm_factors
 
-    # Some statistical quantities
+    # Some statistical quantities --------------------------------------------------------------------------------------
     def median(self, i: int, norm: bool = True,) -> float:
         if norm:
             return median(self.fadh_norm[i], self.weights[i])
@@ -189,7 +189,7 @@ class AdhesionDistribution:
 
         return np.exp(np.sqrt(2 * np.log(mean / med)))
 
-    # Plotting functions
+    # Plotting functions------------------------------------------------------------------------------------------------
     def plot(self, i: int, norm: bool = True, scale: str = 'log', **kwargs) -> None:
         fig, ax = plt.subplots(figsize=(6, 4))
 
@@ -204,10 +204,13 @@ class AdhesionDistribution:
         med = self.median(i, norm=norm)
         mean = self.mean(i, norm=norm)
 
-        ax.axvline(med, color='r', linestyle='-')
-        ax.axvline(mean, color='r', linestyle='--')
+        ax.axvline(med, color='r', linestyle='-', label=f'Median = {med:.2e}')
+        ax.axvline(mean, color='r', linestyle='--', label=f'Mean = {mean:.2e}')
 
-        # Set scale
+        ax.legend()
+        ax.grid(True)
+
+        # Set scale and limits
         ax.set_xscale(scale)
         ax.set_ylim(bottom=0)
 
