@@ -113,12 +113,19 @@ def fraction_velocity_curve(config_file: str) -> None:
     print(np.trapezoid(fraction, target_velocities))
 
     # Plot
-    plt.clf()
-    plt.plot(target_velocities, fraction)
-    plt.xscale('log')
-    plt.ylim(0, 1.1)
+    fig, ax = plt.subplots(figsize=(6, 4))
 
-    plt.grid(axis='x', which='both')
-    plt.grid(axis='y', which='major')
+    ax.plot(target_velocities, fraction)
+    ax.set_xscale('log')
+    ax.set_ylim(0, 1.1)
 
-    plt.savefig('figs/validation.png', dpi=300)
+    ax.set_xlabel('Friction velocity [m/s]')
+    ax.set_ylabel('Remaining fraction after 1s')
+
+    ax.grid(axis='x', which='both')
+    ax.grid(axis='y', which='major')
+
+    fig.tight_layout()
+
+    fig.savefig('figs/validation.png', dpi=300)
+    plt.close(fig)
