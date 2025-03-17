@@ -144,6 +144,17 @@ class SizeDistributionBuilder:
 
 
 class AdhesionDistribution:
+    """
+    Represents the distribution of adhesion forces for each size bin.
+
+    nr: number of size bins
+    na: number of adhesion bins
+
+    Attributes:
+        weights (NDArray[nr x na]): The probability associated to each adhesion force bin. Each line adds up to 1.
+        fadh_norm (NDArray[nr x na]): The normalized adhesion force value for each bin.
+        norm_factors (NDArray[nr]): Normalization factor for each size bin (unit: Newton) .
+    """
     def __init__(self,
                  weights: NDArray[np.floating],
                  fadh_norm: NDArray[np.floating],
@@ -154,6 +165,7 @@ class AdhesionDistribution:
         self.norm_factors = norm_factors
 
     def __str__(self) -> str:
+        """String representation of the adhesion distribution."""
         return (
             f"AdhesionDistribution(\n"
             f"  weights: {np.shape(self.weights)}   - [{self.weights[0,0]:.2e} ... {self.weights[-1,-1]:.2e}],\n"
@@ -164,21 +176,40 @@ class AdhesionDistribution:
 
     @property
     def nbins(self,) -> int:
+        """Returns the number of adhesion bins."""
         return self.weights.shape[1]
 
     @property
     def fadh(self,) -> NDArray[np.floating]:
-        """Return a denormalized adhesion force array"""
+        """Returns a denormalized adhesion force array"""
         return self.fadh_norm * self.norm_factors
 
     # Some statistical quantities --------------------------------------------------------------------------------------
     def median(self, i: int, norm: bool = True,) -> float:
+        """
+        Computes the median adhesion force for a given size bin.
+
+        Args:
+            i (int): The size bin index.
+            norm (bool, optional): Whether to use the normalized adhesion force.
+        Returns:
+            float: The median adhesion force.
+        """
         if norm:
             return median(self.fadh_norm[i], self.weights[i])
         else:
             return median(self.fadh[i], self.weights[i])
 
     def mean(self, i: int, norm: bool = True) -> float:
+        """
+        Computes the median adhesion force for a given size bin.
+
+        Args:
+            i (int): The size bin index.
+            norm (bool, optional): Whether to use the normalized adhesion force.
+        Returns:
+            float: The median adhesion force.
+        """
         if norm:
             return float(np.average(self.fadh_norm[i], weights=self.weights[i]))
         else:
