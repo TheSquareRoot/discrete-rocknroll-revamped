@@ -42,7 +42,6 @@ class Results:
     def time_to_fraction(self, fraction: float) -> float:
         # Normalize resuspended fraction by the final value
         normalized_resuspended = self.resuspended_fraction / self.resuspended_fraction[-1]
-        print(self.resuspended_fraction[-1])
 
         # Find the index where the fraction first exceeds the target percentage
         idx = np.searchsorted(normalized_resuspended, fraction)

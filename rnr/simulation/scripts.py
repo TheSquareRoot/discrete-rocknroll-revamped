@@ -69,7 +69,7 @@ def run(config_file: str) -> None:
     # Build a simulation and run it
     logger.info('Running simulation...')
     sim = Simulation(size_distrib, adh_distrib, flow)
-    res = sim.run()
+    res = sim.run(config['simulation']['vectorized'])
     logger.info('Done.')
 
     res.plot_resuspended_fraction()
@@ -108,9 +108,6 @@ def fraction_velocity_curve(config_file: str) -> None:
 
         # Store the final fraction
         fraction[i] = 1 - res.resuspended_fraction[-1]
-
-    # Evaluate integral
-    print(np.trapezoid(fraction, target_velocities))
 
     # Plot
     fig, ax = plt.subplots(figsize=(6, 4))

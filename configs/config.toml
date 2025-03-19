@@ -11,15 +11,17 @@ nbins = 50
 width = 3.0
 
 modes   = [ 10.0, ]
-spreads = [ 0.0, ]
+spreads = [ 1.0, ]
 weights = [ 1.0, ]
 
 [simulation]
-duration = 1.0
+duration = 10.0
 dt = 1e-3
 
 target_vel = 0.2
 acc_time = 0.0
+
+vectorized = false
 
 [physics]
 adhesion_model = 'JKR'
