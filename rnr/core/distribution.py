@@ -50,25 +50,6 @@ class SizeDistribution:
     def radii_meter(self,) -> NDArray[np.floating]:
         return self.radii * 1e-6
 
-    def plot(self, scale: str = 'log', **kwargs) -> None:
-        """Basic bar plot of the size distribution."""
-        fig, ax = plt.subplots(figsize=(6, 4))
-
-        ax.bar(self.radii, self.weights, **kwargs)
-
-        ax.set_xscale(scale)
-        ax.set_ylim([0.0, 1.1*np.max(self.weights)])
-
-        ax.set_xlabel('radius [µm]')
-        ax.set_ylabel('weight')
-
-        ax.grid(True)
-
-        fig.tight_layout()
-
-        fig.savefig('figs/size_distrib.png', dpi=300)
-        plt.close(fig)
-
 
 class SizeDistributionBuilder:
     def __init__(self,
