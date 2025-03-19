@@ -1,6 +1,6 @@
 import numpy as np
 
-from rnr.utils.config import setup_logging
+from rnr.utils.config import setup_logging, setup_progress_bar
 from rnr.core.distribution import AdhesionDistribution, SizeDistribution
 from rnr.core.flow import Flow
 from rnr.core.model import RocknRollModel
@@ -28,33 +28,43 @@ class Simulation:
         counts = np.zeros([self.flow.nsteps, self.size_distrib.nbins, self.adh_distrib.nbins])
         counts[0,:,:] = self.size_distrib.weights[:, None] * self.adh_distrib.weights
 
-        # Compute the rates for the whole simulation
-        logger.info('Computing rates...')
+        # Instantiate the resuspension model
         resusp_model = RocknRollModel(self.size_distrib, self.adh_distrib, self.flow)
+
         dt = self.flow.time[1] - self.flow.time[0]
 
         logger.info('Entering time loop...')
 
-        # In the vectorized case, the resuspension rate array is computed before the loop. It is usually faster but
-        # requires more memory
-        if vectorized:
-            logger.debug('Vectorized simulation...')
-            rate = resusp_model.rate_vectorized()
+        # Create the progress bar
+        progress = setup_progress_bar()
 
-            for t in range(self.flow.nsteps-1):
-                counts[t+1,:,:] = np.maximum(counts[t,:,:] * (1 - rate[t,:,:] * dt), 0)
+        with progress:
+            sim_task = progress.add_task('Running simulation...', total=self.flow.nsteps)
+            # In the vectorized case, the resuspension rate array is computed before the loop. It is usually faster but
+            # requires more memory
+            if vectorized:
+                logger.debug('Vectorized simulation chosen.')
+                rate = resusp_model.rate_vectorized()
 
-        # In the sequential case, the resuspension rate is computed at each time step
-        else:
-            logger.debug('Sequential simulation...')
-            for t in range(self.flow.nsteps-1):
-                rate = resusp_model.rate(t)
-                counts[t+1,:,:] = np.maximum(counts[t,:,:] * (1 - rate * dt), 0)
+                for t in range(self.flow.nsteps-1):
+                    counts[t+1,:,:] = np.maximum(counts[t,:,:] * (1 - rate[t,:,:] * dt), 0)
 
-        res = Results(self.adh_distrib,
-                      self.size_distrib,
-                      self.flow,
-                      counts,
-                      self.flow.time,)
+                    progress.advance(sim_task)
+
+            # In the sequential case, the resuspension rate is computed at each time step
+            else:
+                logger.debug('Sequential simulation chosen.')
+                for t in range(self.flow.nsteps-1):
+                    rate = resusp_model.rate(t)
+                    counts[t+1,:,:] = np.maximum(counts[t,:,:] * (1 - rate * dt), 0)
+
+                    progress.advance(sim_task)
+
+
+            res = Results(self.adh_distrib,
+                          self.size_distrib,
+                          self.flow,
+                          counts,
+                          self.flow.time,)
 
         return res

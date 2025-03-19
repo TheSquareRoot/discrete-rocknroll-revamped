@@ -2,6 +2,16 @@ import argparse
 import logging
 from logging import StreamHandler
 
+from rich.logging import RichHandler
+from rich.progress import (
+    Progress,
+    BarColumn,
+    SpinnerColumn,
+    TaskProgressColumn,
+    TextColumn,
+    TimeRemainingColumn,
+)
+
 
 def setup_logging(name, log_file):
     # Create logger
@@ -10,7 +20,7 @@ def setup_logging(name, log_file):
 
     # Create handlers
     file_handler = logging.FileHandler(log_file, mode='w')
-    console_handler = StreamHandler()
+    console_handler = RichHandler()
 
     file_handler.setLevel(logging.DEBUG)
     console_handler.setLevel(logging.DEBUG)
@@ -51,3 +61,14 @@ def setup_parsing():
                         action='store_true',)
 
     return parser
+
+def setup_progress_bar():
+    progress = Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        BarColumn(),
+        TaskProgressColumn(),
+        TimeRemainingColumn(),
+    )
+
+    return progress
