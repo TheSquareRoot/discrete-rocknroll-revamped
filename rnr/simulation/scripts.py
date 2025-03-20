@@ -72,6 +72,7 @@ def run(config_file: str) -> None:
     res = sim.run(config['simulation']['vectorized'])
     logger.info('Done.')
 
+    res.plot_distribution()
     res.plot_resuspended_fraction()
     res.plot_instant_rate()
 

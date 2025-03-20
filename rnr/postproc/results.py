@@ -59,14 +59,21 @@ class Results:
 
         return t_target
 
-    def plot_distribution(self, t: int,) -> None:
-        plt.clf()
+    def plot_distribution(self, t: int = 0,) -> None:
+        fig, ax = plt.subplots(figsize=(6, 4))
 
         # plt.matshow(self.counts[t,:,:], norm=matplotlib.colors.LogNorm(vmin=self.counts[-1,:,:].min(), vmax=self.counts[0,:,:].max()))
-        plt.matshow(self.counts[t,:,:])
-        plt.colorbar()
+        cax = ax.matshow(self.counts[t,:,:], cmap='magma', aspect='auto')
 
-        plt.savefig(f'figs/distribution_tstep={t}.png', dpi=300)
+        fig.colorbar(cax, ax=ax, label='Probability')
+
+        ax.set_xlabel('Adhesion force')
+        ax.set_ylabel('Size')
+
+        fig.tight_layout()
+
+        fig.savefig(f'figs/distribution_tstep={t}.png', dpi=300)
+        plt.close(fig)
 
     def plot_remaining_fraction(self, scale: str='log',) -> None:
         fig, ax = plt.subplots(figsize=(6,4))
