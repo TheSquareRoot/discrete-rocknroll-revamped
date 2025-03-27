@@ -65,7 +65,7 @@ def single_run(config_file: str,) -> Results:
     check_config(config)
 
     # Create the output folder for figures
-    name = config['info']['name']
+    name = config['info']['full_name']
     os.makedirs(f'figs/{name}', exist_ok=True)
 
     # Compose the argument dicts for the builders

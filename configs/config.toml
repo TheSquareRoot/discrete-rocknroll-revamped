@@ -1,5 +1,6 @@
 [info]
-name = 'd10_spread1_u02_acc_JKR'
+full_name = 'd10_spread1_u02_acc_JKR'
+short_name = 'D10'
 
 [adhdistrib]
 nbins = 1000
@@ -18,11 +19,11 @@ spreads = [ 1.0, ]
 weights = [ 1.0, ]
 
 [simulation]
-duration = 10.0
+duration = 1.0
 dt = 1e-3
 
 target_vel = 0.2
-acc_time = 5.0
+acc_time = 0.1
 
 vectorized = false
 
