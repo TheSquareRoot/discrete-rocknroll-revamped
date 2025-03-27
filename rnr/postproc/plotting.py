@@ -5,7 +5,7 @@ from ..core.distribution import AdhesionDistribution, SizeDistribution
 from ..core.flow import Flow
 
 
-def plot_size_distribution(size_distrib: SizeDistribution, scale: str = 'linear', **kwargs) -> None:
+def plot_size_distribution(size_distrib: SizeDistribution, name: str, scale: str = 'linear',**kwargs) -> None:
     """Basic bar plot of the size distribution."""
     fig, ax = plt.subplots(figsize=(6, 4))
 
@@ -21,10 +21,10 @@ def plot_size_distribution(size_distrib: SizeDistribution, scale: str = 'linear'
 
     fig.tight_layout()
 
-    fig.savefig('figs/size_distrib.png', dpi=300)
+    fig.savefig(f'figs/{name}/size_distrib.png', dpi=300)
     plt.close(fig)
 
-def plot_adhesion_distribution(adh_distrib: AdhesionDistribution, i: int, norm: bool = True, scale: str = 'log', **kwargs) -> None:
+def plot_adhesion_distribution(adh_distrib: AdhesionDistribution, name: str, i: int, norm: bool = True, scale: str = 'log', **kwargs) -> None:
     """Basic plot of the adhesion distribution of the i-th size bin."""
     fig, ax = plt.subplots(figsize=(6, 4))
 
@@ -51,7 +51,7 @@ def plot_adhesion_distribution(adh_distrib: AdhesionDistribution, i: int, norm: 
 
     fig.tight_layout()
 
-    fig.savefig("figs/adh_distrib.png", dpi=300)
+    fig.savefig(f"figs/{name}/adh_distrib.png", dpi=300)
     plt.close(fig)
 
 def plot_velocity_history(flow: Flow, scale: str = 'linear', **kwargs) -> None:
@@ -70,7 +70,7 @@ def plot_velocity_history(flow: Flow, scale: str = 'linear', **kwargs) -> None:
     fig.savefig('figs/velocity.png', dpi=300)
     plt.close(fig)
 
-def plot_flow(flow: Flow, i: int, scale: str = 'linear', **kwargs) -> None:
+def plot_flow(flow: Flow, name: str, i: int, scale: str = 'linear', **kwargs) -> None:
     """Basic plot of all the time dependant quantities of a flow for the i-th size bin."""
     # Create subplots
     fig, axs = plt.subplots(2, 2, sharex=True, )
@@ -99,5 +99,5 @@ def plot_flow(flow: Flow, i: int, scale: str = 'linear', **kwargs) -> None:
 
     fig.tight_layout()
 
-    fig.savefig('figs/all_aero_forces.png', dpi=300)
+    fig.savefig(f'figs/{name}/all_aero_forces.png', dpi=300)
     plt.close(fig)
