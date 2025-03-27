@@ -1,5 +1,5 @@
 from rnr.utils.config import setup_logging, setup_parsing
-from rnr.simulation.scripts import run, fraction_velocity_curve
+from rnr.simulation.scripts import single_run, fraction_velocity_curve
 
 logger = setup_logging(__name__, 'logs/log.log')
 
@@ -13,7 +13,7 @@ def main():
 
     # Run simulations
     if args.single_run:
-        run(args.config)
+        single_run(args.config)
     elif args.fraction_velocity:
         fraction_velocity_curve(args.config)
 

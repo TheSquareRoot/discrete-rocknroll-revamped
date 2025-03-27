@@ -39,6 +39,14 @@ class Results:
     def instant_rate(self) -> NDArray[np.floating]:
         return self.remaining_fraction[:-1] - self.remaining_fraction[1:]
 
+    @property
+    def final_rem_frac(self,) -> float:
+        return float(self.remaining_fraction[-1])
+
+    @property
+    def final_resus_frac(self,) -> float:
+        return float(self.resuspended_fraction[-1])
+
     def time_to_fraction(self, fraction: float) -> float:
         # Normalize resuspended fraction by the final value
         normalized_resuspended = self.resuspended_fraction / self.resuspended_fraction[-1]
@@ -85,48 +93,4 @@ class Results:
         fig.tight_layout()
 
         fig.savefig(f'figs/remaining_fraction.png', dpi=300)
-        plt.close(fig)
-
-    def plot_resuspended_fraction(self, scale: str='log',) -> None:
-        fig, ax = plt.subplots(figsize=(6, 5))
-
-        ax.plot(self.time, self.resuspended_fraction, color='r',)
-
-        ax.axvline(x=self.time_to_fraction(0.5), ymax=0.5*self.resuspended_fraction[-1]/1.1, color='r', linestyle='-',)
-        ax.axvline(x=self.time_to_fraction(0.9), ymax=0.9*self.resuspended_fraction[-1]/1.1, color='r', linestyle='--',)
-        ax.axvline(x=self.time_to_fraction(0.99), ymax=0.99*self.resuspended_fraction[-1]/1.1, color='r',linestyle=':',)
-
-        ax.set_xlabel('Time [s]')
-        ax.set_ylabel('Resuspended fraction')
-
-        ax.set_xscale(scale)
-        ax.set_xlim(left=self.time[1],)
-        ax.set_ylim(0.0, 1.1)
-
-        ax.grid(axis='x', which='both')
-        ax.grid(axis='y', which='major')
-
-        fig.tight_layout()
-
-        fig.savefig(f'figs/resuspended_fraction.png', dpi=300)
-        plt.close(fig)
-
-    def plot_instant_rate(self, scale: str = 'log',) -> None:
-        fig, ax = plt.subplots(figsize=(6, 5))
-
-        ax.plot(self.time[:-1], self.instant_rate, color='r',)
-
-        ax.set_xlabel('Time [s]')
-        ax.set_ylabel('Resuspension rate')
-
-        ax.set_xscale(scale)
-        ax.set_yscale('log')
-        ax.set_xlim(self.time[1], self.time[-1])
-
-        ax.grid(axis='x', which='both')
-        ax.grid(axis='y', which='major')
-
-        fig.tight_layout()
-
-        fig.savefig(f'figs/instant_rate.png', dpi=300)
         plt.close(fig)

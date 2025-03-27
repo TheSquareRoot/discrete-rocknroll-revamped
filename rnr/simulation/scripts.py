@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import os
 
 from rnr.utils.config import setup_logging
 from rnr.utils.parameters import check_config, load_config
@@ -8,12 +9,18 @@ from rnr.core.aeromodel import BaseAeroModel
 from rnr.core.distribution import SizeDistributionBuilder, AdhesionDistributionBuilder
 from rnr.core.flow import FlowBuilder
 from rnr.simulation.simulation import Simulation
-from rnr.postproc.plotting import plot_size_distribution
+from rnr.postproc.plotting import (plot_adhesion_distribution,
+                                   plot_size_distribution,
+                                   plot_flow,
+                                   plot_resuspended_fraction,
+                                   plot_instant_rate,
+                                   )
+from rnr.postproc.results import Results
 
 
 logger = setup_logging(__name__, 'logs/log.log')
 
-def _build_distribs(size_params, adh_params, plot=False,):
+def _build_distribs(size_params, adh_params, name=None, plot=False,):
     # Build the particle size distribution
     logger.info('Generating size distribution...')
     sizedistrib_builder = SizeDistributionBuilder(**size_params)
@@ -28,12 +35,12 @@ def _build_distribs(size_params, adh_params, plot=False,):
 
     # Plot the distributions if the user requested
     if plot:
-        plot_size_distribution(size_distrib, scale='linear')
-        adh_distrib.plot(0, norm=False, scale='linear')
+        plot_size_distribution(size_distrib, name, scale='linear')
+        plot_adhesion_distribution(adh_distrib, name, 0, norm=False, scale='linear')
 
     return size_distrib, adh_distrib
 
-def _build_flow(size_distrib, flow_params, plot=False):
+def _build_flow(size_distrib, flow_params, name=None, plot=False):
     # Instantiate force model
     aeromodel = BaseAeroModel(**flow_params)
 
@@ -45,11 +52,11 @@ def _build_flow(size_distrib, flow_params, plot=False):
 
     # Plot the time histories if requested
     if plot:
-        flow.plot_all(0)
+        plot_flow(flow, name,0)
 
     return flow
 
-def run(config_file: str) -> None:
+def single_run(config_file: str,) -> Results:
     # Load utils file
     config = load_config(f"configs/{config_file}.toml")
 
@@ -57,14 +64,18 @@ def run(config_file: str) -> None:
     logger.info('Checking parameters...')
     check_config(config)
 
+    # Create the output folder for figures
+    name = config['info']['name']
+    os.makedirs(f'figs/{name}', exist_ok=True)
+
     # Compose the argument dicts for the builders
     size_params = config['sizedistrib']
     adh_params = {**config['adhdistrib'], **config['physics']}
     flow_params = {**config['simulation'], **config['physics']}
 
     # Build the distributions and the flow
-    size_distrib, adh_distrib = _build_distribs(size_params, adh_params, plot=True)
-    flow = _build_flow(size_distrib, flow_params, plot=True)
+    size_distrib, adh_distrib = _build_distribs(size_params, adh_params, name, plot=True)
+    flow = _build_flow(size_distrib, flow_params, name, plot=True)
 
     # Build a simulation and run it
     logger.info('Running simulation...')
@@ -72,9 +83,11 @@ def run(config_file: str) -> None:
     res = sim.run(config['simulation']['vectorized'])
     logger.info('Done.')
 
-    res.plot_distribution()
-    res.plot_resuspended_fraction()
-    res.plot_instant_rate()
+    # Plot basic results
+    plot_resuspended_fraction(res, name)
+    plot_instant_rate(res, name)
+
+    return res
 
 def fraction_velocity_curve(config_file: str) -> None:
     # Load utils file

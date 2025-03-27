@@ -1,5 +1,8 @@
+[info]
+name = 'd10_spread1_u02_acc_JKR'
+
 [adhdistrib]
-nbins   = 1000
+nbins = 1000
 fmax = 2.0
 
 dist_params  = 'biasi'
@@ -19,7 +22,7 @@ duration = 10.0
 dt = 1e-3
 
 target_vel = 0.2
-acc_time = 0.0
+acc_time = 5.0
 
 vectorized = false
 
