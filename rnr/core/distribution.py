@@ -201,36 +201,6 @@ class AdhesionDistribution:
 
         return np.exp(np.sqrt(2 * np.log(mean / med)))
 
-    # Plotting functions------------------------------------------------------------------------------------------------
-    def plot(self, i: int, norm: bool = True, scale: str = 'log', **kwargs) -> None:
-        fig, ax = plt.subplots(figsize=(6, 4))
-
-        if norm:
-            ax.plot(self.fadh_norm[i], self.weights[i], **kwargs)
-            ax.set_xlabel('Normalized adhesion force')
-        else:
-            ax.plot(self.fadh[i], self.weights[i], **kwargs)
-            ax.set_xlabel('Adhesion force [N]')
-
-        # Compute the median and display it
-        med = self.median(i, norm=norm)
-        mean = self.mean(i, norm=norm)
-
-        ax.axvline(med, color='r', linestyle='-', label=f'Median = {med:.2e}')
-        ax.axvline(mean, color='r', linestyle='--', label=f'Mean = {mean:.2e}')
-
-        ax.legend()
-        ax.grid(True)
-
-        # Set scale and limits
-        ax.set_xscale(scale)
-        ax.set_ylim(bottom=0)
-
-        fig.tight_layout()
-
-        fig.savefig("figs/adh_distrib.png", dpi=300)
-        plt.close(fig)
-
 
 class AdhesionDistributionBuilder:
     def __init__(self,

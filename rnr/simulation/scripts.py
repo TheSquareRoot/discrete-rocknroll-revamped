@@ -8,7 +8,10 @@ from rnr.core.aeromodel import BaseAeroModel
 from rnr.core.distribution import SizeDistributionBuilder, AdhesionDistributionBuilder
 from rnr.core.flow import FlowBuilder
 from rnr.simulation.simulation import Simulation
-from rnr.postproc.plotting import plot_size_distribution
+from rnr.postproc.plotting import (plot_adhesion_distribution,
+                                   plot_size_distribution,
+                                   plot_flow,
+                                   )
 
 
 logger = setup_logging(__name__, 'logs/log.log')
@@ -29,7 +32,7 @@ def _build_distribs(size_params, adh_params, plot=False,):
     # Plot the distributions if the user requested
     if plot:
         plot_size_distribution(size_distrib, scale='linear')
-        adh_distrib.plot(0, norm=False, scale='linear')
+        plot_adhesion_distribution(adh_distrib, 0, norm=False, scale='linear')
 
     return size_distrib, adh_distrib
 
@@ -45,7 +48,7 @@ def _build_flow(size_distrib, flow_params, plot=False):
 
     # Plot the time histories if requested
     if plot:
-        flow.plot_all(0)
+        plot_flow(flow, 0)
 
     return flow
 

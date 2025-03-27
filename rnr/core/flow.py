@@ -45,52 +45,6 @@ class Flow:
     def faero(self,) -> NDArray[np.floating]:
         return 0.5 * self.lift + 100 * self.drag
 
-    def plot(self, scale: str = 'linear', **kwargs) -> None:
-        fig, ax = plt.subplots(figsize=(6, 4))
-
-        ax.plot(self.time, self.velocity, **kwargs)
-
-        ax.set_xscale(scale)
-
-        ax.set_xlabel('Time [s]')
-        ax.set_ylabel('Friction velocity [m/s]')
-
-        fig.tight_layout()
-
-        fig.savefig('figs/velocity.png', dpi=300)
-        plt.close(fig)
-
-    def plot_all(self, i: int, scale: str = 'linear', **kwargs) -> None:
-        # Create subplots
-        fig, axs = plt.subplots(2,2, sharex=True,)
-        axs[1,0].sharey(axs[1,1])
-
-        # plot all time histories
-        axs[0,0].plot(self.time, self.velocity, color='black', **kwargs)
-        axs[0,1].plot(self.time, self.burst, color='green', **kwargs)
-        axs[1,0].plot(self.time, self.lift[:,i], color='orange',**kwargs)
-        axs[1,1].plot(self.time, self.drag[:,i], color='red', **kwargs)
-
-        # Axis labels
-        axs[0,0].set_ylabel('Friction velocity [m/s]')
-        axs[0,1].set_ylabel('Burst frequency [s-1]')
-        axs[1,0].set_ylabel('Lift [N]')
-        axs[1,1].set_ylabel('Drag [N]')
-
-        # Setting shared properties
-        for ax in axs.flat:
-            # Limits
-            ax.set_xlim(left=0, right=self.time[-1])
-            ax.set_ylim(bottom=0)
-
-            # Grids
-            ax.grid(True)
-
-        fig.tight_layout()
-
-        fig.savefig('figs/all_aero_forces.png', dpi=300)
-        plt.close(fig)
-
 
 class FlowBuilder:
     def __init__(self,
