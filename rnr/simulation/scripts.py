@@ -12,6 +12,8 @@ from rnr.simulation.simulation import Simulation
 from rnr.postproc.plotting import (plot_adhesion_distribution,
                                    plot_size_distribution,
                                    plot_flow,
+                                   plot_resuspended_fraction,
+                                   plot_instant_rate,
                                    )
 from rnr.postproc.results import Results
 
@@ -82,8 +84,8 @@ def single_run(config_file: str,) -> Results:
     logger.info('Done.')
 
     # Plot basic results
-    res.plot_resuspended_fraction()
-    res.plot_instant_rate()
+    plot_resuspended_fraction(res, name)
+    plot_instant_rate(res, name)
 
     return res
 

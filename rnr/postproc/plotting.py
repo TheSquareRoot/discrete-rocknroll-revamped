@@ -3,7 +3,11 @@ import numpy as np
 
 from ..core.distribution import AdhesionDistribution, SizeDistribution
 from ..core.flow import Flow
+from ..postproc.results import Results
 
+# ======================================================================================================================
+# DISTRIBUTION PLOTS
+# ======================================================================================================================
 
 def plot_size_distribution(size_distrib: SizeDistribution, name: str, scale: str = 'linear',**kwargs) -> None:
     """Basic bar plot of the size distribution."""
@@ -54,6 +58,10 @@ def plot_adhesion_distribution(adh_distrib: AdhesionDistribution, name: str, i: 
     fig.savefig(f"figs/{name}/adh_distrib.png", dpi=300)
     plt.close(fig)
 
+# ======================================================================================================================
+# VELOCITY AND AERODYNAMIC QUANTITIES PLOTS
+# ======================================================================================================================
+
 def plot_velocity_history(flow: Flow, scale: str = 'linear', **kwargs) -> None:
     """Basic plot of the time history of friction velocity."""
     fig, ax = plt.subplots(figsize=(6, 4))
@@ -100,4 +108,57 @@ def plot_flow(flow: Flow, name: str, i: int, scale: str = 'linear', **kwargs) ->
     fig.tight_layout()
 
     fig.savefig(f'figs/{name}/all_aero_forces.png', dpi=300)
+    plt.close(fig)
+
+# ======================================================================================================================
+# POST-PROCESSING PLOTS
+# ======================================================================================================================
+
+def plot_resuspended_fraction(res: Results, name: str, scale: str = 'log',) -> None:
+    fig, ax = plt.subplots(figsize=(6, 5))
+
+    ax.plot(res.time, res.resuspended_fraction, color='r', )
+
+    # Draw resuspension milestones lines
+    fracs = [0.5, 0.9, 0.99]
+    x = [res.time_to_fraction(frac) for frac in fracs]
+    y = [frac * res.final_resus_frac for frac in fracs]
+
+    ax.axvline(x=x[0], ymax=y[0], color='r', linestyle='-', )
+    ax.axvline(x=x[1], ymax=y[1], color='r', linestyle='--', )
+    ax.axvline(x=x[2], ymax=y[2], color='r', linestyle=':', )
+
+    ax.set_xlabel('Time [s]')
+    ax.set_ylabel('Resuspended fraction')
+
+    ax.set_xscale(scale)
+    ax.set_xlim(left=res.time[1], )
+    ax.set_ylim(0.0, 1.0)
+
+    ax.grid(axis='x', which='both')
+    ax.grid(axis='y', which='major')
+
+    fig.tight_layout()
+
+    fig.savefig(f'figs/{name}/resuspended_fraction.png', dpi=300)
+    plt.close(fig)
+
+def plot_instant_rate(res: Results, name: str, scale: str = 'log',) -> None:
+    fig, ax = plt.subplots(figsize=(6, 5))
+
+    ax.plot(res.time[:-1], res.instant_rate, color='r',)
+
+    ax.set_xlabel('Time [s]')
+    ax.set_ylabel('Resuspension rate')
+
+    ax.set_xscale(scale)
+    ax.set_yscale('log')
+    ax.set_xlim(res.time[1], res.time[-1])
+
+    ax.grid(axis='x', which='both')
+    ax.grid(axis='y', which='major')
+
+    fig.tight_layout()
+
+    fig.savefig(f'figs/{name}/instant_rate.png', dpi=300)
     plt.close(fig)
