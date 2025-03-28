@@ -16,6 +16,7 @@ from rnr.postproc.plotting import (plot_adhesion_distribution,
                                    plot_instant_rate,
                                    )
 from rnr.postproc.results import Results
+from rnr.utils.misc import read_exp_data
 
 
 logger = setup_logging(__name__, 'logs/log.log')
@@ -123,10 +124,18 @@ def fraction_velocity_curve(config_file: str) -> None:
         # Store the final fraction
         fraction[i] = 1 - res.resuspended_fraction[-1]
 
+    # Load Reeks and Hall data
+    exp_data = read_exp_data()
+
     # Plot
     fig, ax = plt.subplots(figsize=(6, 4))
 
-    ax.plot(target_velocities, fraction)
+    ax.plot(target_velocities, fraction, color='r')
+
+    ax.scatter(exp_data[10][9][0], exp_data[10][9][1], color='blue', marker='^', facecolors='none', label='Exp. run 9')
+    ax.scatter(exp_data[10][10][0], exp_data[10][10][1], color='black', marker='s', facecolors='none', label='Exp. run 10')
+    ax.scatter(exp_data[10][15][0], exp_data[10][15][1], color='red', marker='o', facecolors='none', label='Exp. run 15')
+
     ax.set_xscale('log')
     ax.set_ylim(0, 1.1)
 
