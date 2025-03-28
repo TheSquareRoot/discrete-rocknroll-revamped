@@ -35,7 +35,6 @@ class BaseAeroModel(AeroModel):
                  density: float,
                  viscosity: float,
                  drag_coeff: float,
-                 drag_power: float,
                  lift_coeff: float,
                  lift_power: float,
                  burst_coeff: float,
@@ -43,7 +42,6 @@ class BaseAeroModel(AeroModel):
         self.density = density
         self.viscosity = viscosity
         self.drag_coeff = drag_coeff
-        self.drag_power = drag_power
         self.lift_coeff = lift_coeff
         self.lift_power = lift_power
         self.burst_coeff = burst_coeff
@@ -66,7 +64,7 @@ class BaseAeroModel(AeroModel):
         velocity = velocity.reshape(-1, 1)
         radii = radii.reshape(1, -1)
 
-        return self.drag_coeff * self.density * (self.viscosity ** 2) * ((radii * velocity / self.viscosity) ** self.drag_power)
+        return self.drag_coeff * self.density * (self.viscosity ** 2) * ((radii * velocity / self.viscosity) ** 2)
 
     def burst(self,
              velocity: NDArray[np.floating],

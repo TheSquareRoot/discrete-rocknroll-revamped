@@ -36,7 +36,6 @@ surface_energy = 0.15
 
 # Parameters of the aerodynamic quantities model
 drag_coeff = 32.0
-drag_power = 2.0
 
 lift_coeff = 20.9
 lift_power = 2.31
