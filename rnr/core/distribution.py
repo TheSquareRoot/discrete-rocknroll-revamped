@@ -236,19 +236,18 @@ class AdhesionDistributionBuilder:
         elif self.dist_params == 'custom':
             # Distinguish between the spread and no spread case.
             # If there is a radius spread, it is unlikely the user will provide means and spreads for each size bin
-            # So instead, values have to be derived from the uer inputs.
-            if len(self.means) != self.size_distrib.nbins:
-                return self.means, self.spreads
+            # So instead, values have to be derived from the user inputs.
+            # If only set of parameters is used, it is applied to all size bins
+            if len(self.means) == 1:
+                return (np.ones(self.size_distrib.nbins) * self.means[0],
+                        np.ones(self.size_distrib.nbins) * self.spreads[0])
+            # If there as many sets of params are modes, one set is assigned to each mode
+            elif len(self.means) == self.size_distrib.nmodes:
+                #TODO: implement what happens when a set of parameters are provided for each mode
+                pass
+            # Otherwise wtf are they doing anyway
             else:
-                # If only set of parameters is used, it is applied to all size bins
-                if len(self.means) == 1:
-                    return (np.ones(self.size_distrib.nbins) * self.means[0],
-                            np.ones(self.size_distrib.nbins) * self.means[0])
-                elif len(self.means) == self.size_distrib.nmodes:
-                    #TODO: implement what happens when a set of parameters are provided for each mode
-                    pass
-                else:
-                    raise ValueError(f'Inccorrect number of parameters provided: {len(self.means)}')
+                raise ValueError(f'Inccorrect number of parameters provided: {len(self.means)}')
         else:
             raise ValueError(f'Unknown distribution parameter {self.dist_params}')
 
