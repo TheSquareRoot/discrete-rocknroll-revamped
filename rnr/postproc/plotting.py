@@ -158,6 +158,7 @@ def plot_instant_rate(results: list[Results], name: str, scale: str = 'log',) ->
     ax.set_xscale(scale)
     ax.set_yscale('log')
     ax.set_xlim(results[0].time[1], results[0].time[-1])
+    ax.set_ylim(bottom=1e-10, top=1e0)
 
     ax.grid(axis='x', which='both')
     ax.grid(axis='y', which='major')
