@@ -1,0 +1,43 @@
+[info]
+full_name = 'd10_u2_JKR'
+short_name = 'U01'
+
+[adhdistrib]
+nbins = 1000
+fmax = 2.0
+
+dist_params  = 'biasi'
+medians = [ 1.0, ]
+spreads = [ 1.0, ]
+
+[sizedistrib]
+nbins = 50
+width = 3.0
+
+modes   = [ 10.0, ]
+spreads = [ 0.0, ]
+weights = [ 1.0, ]
+
+[simulation]
+duration = 10.0
+dt = 1e-4
+
+target_vel = 0.1
+acc_time = 0.0
+
+vectorized = true
+
+[physics]
+adhesion_model = 'JKR'
+
+density = 1.293
+viscosity = 1.52e-5
+surface_energy = 0.15
+
+# Parameters of the aerodynamic quantities model
+drag_coeff = 32.0
+
+lift_coeff = 20.9
+lift_power = 2.31
+
+burst_coeff = 0.00658
