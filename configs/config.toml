@@ -7,8 +7,8 @@ nbins = 1000
 fmax = 2.0
 
 dist_params  = 'biasi'
-medians = [ 1.0, 1.0 ]
-spreads = [ 1.0, 1.0 ]
+medians = [ 1.0, ]
+spreads = [ 1.0, ]
 
 [sizedistrib]
 nbins = 50
