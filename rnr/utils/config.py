@@ -50,14 +50,20 @@ def setup_parsing():
     parser = argparse.ArgumentParser()
 
     # Add CLi arguments to the parser
-    parser.add_argument('-c','--config',
+    parser.add_argument('-c','--config-file',
                         help='name of the configuration file',
+                        type=str,)
+    parser.add_argument('-d','--config-dir',
+                        help='name of the configuration directory',
                         type=str,)
     parser.add_argument('-r','--single-run',
                         help='run a single simulation from the utils file',
                         action='store_true',)
     parser.add_argument('-f','--fraction-velocity',
                         help='plot the fraction-velocity curve',
+                        action='store_true',)
+    parser.add_argument('-m','--multiple-runs',
+                        help='run multiple simulations from different config files.',
                         action='store_true',)
 
     return parser
