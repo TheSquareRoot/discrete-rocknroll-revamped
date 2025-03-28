@@ -27,7 +27,7 @@ def check_config(config):
     # Creation of derived parameters
     # i.e. params indirectly defined by the user, and that are practical to store as parameters
     config['sizedistrib']['nmodes'] = len(config['sizedistrib']['modes'])
-    
+
     # ADHESION PARAMETERS
     # If biasi params are selected, user should not define custom median and scatter values
     if config['adhdistrib']['dist_params'] == 'biasi':
@@ -36,7 +36,7 @@ def check_config(config):
 
         if config['physics']['adhesion_model'] == 'Rabinovich':
             logger.error('Biasi parameters should only be used with the JKR model.')
-            
+
     # SIMULATION PARAMETERS
     if config['simulation']['duration'] < config['simulation']['dt']:
         logger.error(f'dt must be smaller than total duration. dt set to {config["simulation"]["duration"]:.2f}s')
