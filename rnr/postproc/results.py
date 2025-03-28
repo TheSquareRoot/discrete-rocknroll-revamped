@@ -20,7 +20,7 @@ class Results:
                  counts: NDArray[np.floating],
                  time: NDArray[np.floating],
                  ) -> None:
-
+        self.name = 'NA'
         self.adh_distrib = adh_distrib
         self.size_distrib = size_distrib
         self.flow = flow

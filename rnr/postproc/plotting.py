@@ -114,25 +114,27 @@ def plot_flow(flow: Flow, name: str, i: int, scale: str = 'linear', **kwargs) ->
 # POST-PROCESSING PLOTS
 # ======================================================================================================================
 
-def plot_resuspended_fraction(res: Results, name: str, scale: str = 'log',) -> None:
+def plot_resuspended_fraction(results: list[Results], name: str, scale: str = 'log',) -> None:
     fig, ax = plt.subplots(figsize=(6, 5))
 
-    ax.plot(res.time, res.resuspended_fraction, color='r', )
+    for res in results:
+        ax.plot(res.time, res.resuspended_fraction, label=f'{res.name}')
 
     # Draw resuspension milestones lines
-    fracs = [0.5, 0.9, 0.99]
-    x = [res.time_to_fraction(frac) for frac in fracs]
-    y = [frac * res.final_resus_frac for frac in fracs]
-
-    ax.axvline(x=x[0], ymax=y[0], color='r', linestyle='-', )
-    ax.axvline(x=x[1], ymax=y[1], color='r', linestyle='--', )
-    ax.axvline(x=x[2], ymax=y[2], color='r', linestyle=':', )
+    # fracs = [0.5, 0.9, 0.99]
+    # x = [res.time_to_fraction(frac) for frac in fracs]
+    # y = [frac * res.final_resus_frac for frac in fracs]
+    #
+    # ax.axvline(x=x[0], ymax=y[0], color='r', linestyle='-', )
+    # ax.axvline(x=x[1], ymax=y[1], color='r', linestyle='--', )
+    # ax.axvline(x=x[2], ymax=y[2], color='r', linestyle=':', )
 
     ax.set_xlabel('Time [s]')
     ax.set_ylabel('Resuspended fraction')
+    ax.legend()
 
     ax.set_xscale(scale)
-    ax.set_xlim(left=res.time[1], )
+    ax.set_xlim(left=results[0].time[1], )
     ax.set_ylim(0.0, 1.0)
 
     ax.grid(axis='x', which='both')
@@ -143,17 +145,19 @@ def plot_resuspended_fraction(res: Results, name: str, scale: str = 'log',) -> N
     fig.savefig(f'figs/{name}/resuspended_fraction.png', dpi=300)
     plt.close(fig)
 
-def plot_instant_rate(res: Results, name: str, scale: str = 'log',) -> None:
+def plot_instant_rate(results: list[Results], name: str, scale: str = 'log',) -> None:
     fig, ax = plt.subplots(figsize=(6, 5))
 
-    ax.plot(res.time[:-1], res.instant_rate, color='r',)
+    for res in results:
+        ax.plot(res.time[:-1], res.instant_rate, label=f'{res.name}')
 
     ax.set_xlabel('Time [s]')
     ax.set_ylabel('Resuspension rate')
+    ax.legend()
 
     ax.set_xscale(scale)
     ax.set_yscale('log')
-    ax.set_xlim(res.time[1], res.time[-1])
+    ax.set_xlim(results[0].time[1], results[0].time[-1])
 
     ax.grid(axis='x', which='both')
     ax.grid(axis='y', which='major')

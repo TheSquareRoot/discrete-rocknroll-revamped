@@ -82,13 +82,29 @@ def single_run(config_file: str,) -> Results:
     logger.info('Running simulation...')
     sim = Simulation(size_distrib, adh_distrib, flow)
     res = sim.run(config['simulation']['vectorized'])
+    res.name = config['info']['short_name']
     logger.info('Done.')
 
     # Plot basic results
-    plot_resuspended_fraction(res, name)
-    plot_instant_rate(res, name)
+    plot_resuspended_fraction([res], name,)
+    plot_instant_rate([res], name)
 
     return res
+
+def multiple_runs(config_dir: str,) -> None:
+    # Get the config files from the directory
+    dir_path = f"configs/{config_dir}/"
+    config_files = [f for f in os.listdir(dir_path) if f.endswith(".toml")]
+
+    # Run the simulations
+    results = []
+
+    for config_file in config_files:
+        path = f"{config_dir}/{config_file.split('.')[0]}"
+        results.append(single_run(path))
+
+    plot_resuspended_fraction(results, name='multi',)
+    plot_instant_rate(results, name='multi',)
 
 def fraction_velocity_curve(config_file: str) -> None:
     # Load utils file
