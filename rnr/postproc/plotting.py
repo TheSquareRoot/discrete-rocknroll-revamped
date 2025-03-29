@@ -5,7 +5,7 @@ from numpy.typing import NDArray
 
 from ..core.distribution import AdhesionDistribution, SizeDistribution
 from ..core.flow import Flow
-from ..postproc.results import Results
+from ..postproc.results import TemporalResults
 from ..utils.misc import read_exp_data
 
 
@@ -150,12 +150,12 @@ def plot_flow(flow: Flow, name: str, i: int, scale: str = 'linear', **kwargs) ->
 # POST-PROCESSING PLOTS
 # ======================================================================================================================
 
-def plot_resuspended_fraction(results: list[Results], name: str, scale: str = 'log',) -> None:
+def plot_resuspended_fraction(results: list[TemporalResults], name: str, scale: str = 'log', ) -> None:
     """
     Basic plot of the resuspended fraction with time. Can take several simulation results.
 
     Args:
-        results (list[Results]): List of simulation result objects.
+        results (list[TemporalResults]): List of simulation result objects.
         name (str): Name of the configuration file. Will be used to save the figure in the right folder.
         scale (str, optional): Scale of the x-axis. Defaults to 'log'.
     """
@@ -189,12 +189,12 @@ def plot_resuspended_fraction(results: list[Results], name: str, scale: str = 'l
     fig.savefig(f'figs/{name}/resuspended_fraction.png', dpi=300)
     plt.close(fig)
 
-def plot_instant_rate(results: list[Results], name: str, xscale: str = 'log', yscale: str = 'log',) -> None:
+def plot_instant_rate(results: list[TemporalResults], name: str, xscale: str = 'log', yscale: str = 'log', ) -> None:
     """
     Basic plot of the instant resuspension rate with time. Can take several simulation results.
 
     Args:
-        results (list[Results]): List of simulation result objects.
+        results (list[TemporalResults]): List of simulation result objects.
         name (str): Name of the configuration file. Will be used to save the figure in the right folder.
         xscale (str, optional): Scale of the x-axis. Defaults to 'log'.
         yscale (str, optional): Scale of the y-axis. Defaults to 'log'.

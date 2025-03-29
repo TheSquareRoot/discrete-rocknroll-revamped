@@ -16,7 +16,7 @@ from rnr.postproc.plotting import (plot_adhesion_distribution,
                                    plot_instant_rate,
                                    plot_fraction_velocity_curve
                                    )
-from rnr.postproc.results import Results
+from rnr.postproc.results import TemporalResults
 from rnr.utils.misc import read_exp_data
 
 
@@ -58,7 +58,7 @@ def _build_flow(size_distrib, flow_params, name=None, plot=False):
 
     return flow
 
-def single_run(config_file: str,) -> Results:
+def single_run(config_file: str,) -> TemporalResults:
     # Load utils file
     config = load_config(f"configs/{config_file}.toml")
 

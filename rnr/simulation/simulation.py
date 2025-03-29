@@ -4,7 +4,7 @@ from rnr.utils.config import setup_logging, setup_progress_bar
 from rnr.core.distribution import AdhesionDistribution, SizeDistribution
 from rnr.core.flow import Flow
 from rnr.core.model import RocknRollModel
-from rnr.postproc.results import Results
+from rnr.postproc.results import TemporalResults
 
 
 # Configure module logger from utils file
@@ -22,7 +22,7 @@ class Simulation:
         self.adh_distrib = adh_distrib
         self.flow = flow
 
-    def run(self, vectorized: bool = False) -> Results:
+    def run(self, vectorized: bool = False) -> TemporalResults:
         # Build population array
         logger.info('Building population array...')
         counts = np.zeros([self.flow.nsteps, self.size_distrib.nbins, self.adh_distrib.nbins])
@@ -61,10 +61,10 @@ class Simulation:
                     progress.advance(sim_task)
 
 
-            res = Results(self.adh_distrib,
-                          self.size_distrib,
-                          self.flow,
-                          counts,
-                          self.flow.time,)
+            res = TemporalResults(self.adh_distrib,
+                                  self.size_distrib,
+                                  self.flow,
+                                  counts,
+                                  self.flow.time, )
 
         return res

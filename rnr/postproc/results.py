@@ -15,14 +15,20 @@ logger = setup_logging(__name__, 'logs/log.log')
 class Results:
     def __init__(self,
                  adh_distrib: AdhesionDistribution,
+                 size_distrib: SizeDistribution,) -> None:
+        self.name = 'NA'
+        self.adh_distrib = adh_distrib
+        self.size_distrib = size_distrib
+
+class TemporalResults(Results):
+    def __init__(self,
+                 adh_distrib: AdhesionDistribution,
                  size_distrib: SizeDistribution,
                  flow: Flow,
                  counts: NDArray[np.floating],
                  time: NDArray[np.floating],
                  ) -> None:
-        self.name = 'NA'
-        self.adh_distrib = adh_distrib
-        self.size_distrib = size_distrib
+        super().__init__(adh_distrib, size_distrib)
         self.flow = flow
         self.counts = counts
         self.time = time
