@@ -148,3 +148,5 @@ def fraction_velocity_curve(config_file: str) -> None:
 
     # Plot the curve
     plot_fraction_velocity_curve(res, plot_exp=(config_file == 'reeks'))
+    print(f'Critical threshold velocity (50%): {res.threshold_velocity(0.5):.2f}m/s')
+    print(f'Resuspension range: {res.resuspension_range:.2f}m/s')

@@ -114,3 +114,42 @@ class FractionVelocityResults(Results):
         self.fraction = fraction
         self.velocities = velocities
 
+    @property
+    def resuspension_range(self,) -> float:
+        """
+        Computes the range of velocity between 5% and 95% of particles resuspended.
+        Expresses the sensitivity to velocity bursts.
+        """
+        low_thresh = self.threshold_velocity(0.95)
+        high_thresh = self.threshold_velocity(0.05)
+
+        return high_thresh - low_thresh
+
+    def threshold_velocity(self, fraction: float) -> float:
+        """
+        Computes the velocity at which k% of the particles have been resuspended.
+
+        Parameters:
+        - k (float): The target percentage (between 0 and 100).
+
+        Returns:
+        - float: The estimated threshold friction velocity [m/s].
+        """
+        # Find the index where the fraction first exceeds the target percentage
+        velocities = np.flip(self.velocities)
+        fractions = np.flip(self.fraction)
+
+        idx = np.searchsorted(fractions, fraction)
+
+        if idx == 0:
+            return velocities[0]  # If the target is reached immediately
+
+        if idx >= len(velocities):
+            return velocities[-1]  # If the target is never reached
+
+        # Linear interpolation for better accuracy
+        v1, v2 = velocities[idx - 1], velocities[idx]
+        f1, f2 = fractions[idx - 1], fractions[idx]
+        v_target = v1 + (fraction - f1) * (v2 - v1) / (f2 - f1)
+
+        return v_target
