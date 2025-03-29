@@ -2,6 +2,7 @@ import sys
 import toml
 
 from .config import setup_logging
+from ..utils.misc import rplus
 
 
 # Configure module logger from utils file
@@ -19,6 +20,18 @@ def load_config(file_path: str) -> dict:
     except toml.TomlDecodeError as e:
         logger.error(f'Error: Failed to parse "{file_path}": {e}', file=sys.stderr)
         sys.exit(1)
+
+def check_model_validity(config):
+    """
+    Checks that each mode is within the allowed r+ range for the given flow conditions.
+    The main thing to check is that r+ is less than 2.5, i.e. the particle is fully submerged in the
+    viscous sublayer.
+    """
+    for i, mode in enumerate(config['sizedistrib']['modes']):
+        rp = rplus(mode*1e-6, config['simulation']['target_vel'], config['physics']['viscosity'])
+        logger.info(f'Mode {i+1}: r+={rp:.2f}')
+        if rp > 2.5:
+            logger.warning(f'Mode {i} is outside the viscous sublayer!')
 
 def check_config(config):
     """
@@ -44,3 +57,7 @@ def check_config(config):
 
     if config['simulation']['duration'] < config['simulation']['acc_time']:
         logger.warning('Spin-up time is longer than simulation time.')
+
+    # Check whether the hypothesis of the RnR model are respected
+    check_model_validity(config)
+

@@ -12,6 +12,10 @@ from .config import setup_logging
 logger = setup_logging(__name__, 'logs/log.log')
 
 
+def rplus(radius: float, friction_vel: float, viscosity: float) -> float:
+    """Computes the r+ quantity (i.e. the particle size expressed in wall units)"""
+    return radius * friction_vel / viscosity
+
 def biasi_params(radii) -> tuple:
     """
     Return the log-normal median and spread parameters for an arbitrary number of radii.
@@ -23,7 +27,6 @@ def biasi_params(radii) -> tuple:
     spreads = np.array([1.8 + 0.136 * (r ** 1.4) for r in radii])
 
     return medians, spreads
-
 
 def force_jkr(radius: float, surface_energy: float,) -> float:
     """Adhesion force of a spherical particle on a flat surface according to JKR theory."""
