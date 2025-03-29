@@ -261,7 +261,7 @@ def plot_validity_domain(modes: list[float], target_vel: float, viscosity: float
     fig.savefig('figs/validity_domain.png', dpi=300)
     plt.close(fig)
 
-def plot_fraction_velocity_curve(res: FractionVelocityResults, plot_exp=False,) -> None:
+def plot_fraction_velocity_curve(res: FractionVelocityResults, plot_exp=False, plot_stats=True,) -> None:
     """
     Basic plot of the fraction-velocity curve.
 
@@ -272,7 +272,15 @@ def plot_fraction_velocity_curve(res: FractionVelocityResults, plot_exp=False,) 
     # Plot
     fig, ax = plt.subplots(figsize=(6, 4))
 
-    ax.plot(res.velocities, res.fraction, color='r',)
+    ax.plot(res.velocities, res.fraction, color='r', zorder=10)
+
+    # Plot analysis quantities
+    if plot_stats:
+        vlow, vhigh = res.threshold_velocity(0.95), res.threshold_velocity(0.05)
+
+        ax.axvline(vhigh, color='k', linestyle='--', linewidth=0.75, zorder=5)
+        ax.axvline(vlow, color='k', linestyle='--', linewidth=0.75, zorder=5)
+        ax.fill_betweenx(y=[0, 1.1], x1=vlow, x2=vhigh, color='grey', alpha=0.3, zorder=3)
 
     # Load Reeks and Hall data
     if plot_exp:
@@ -285,13 +293,14 @@ def plot_fraction_velocity_curve(res: FractionVelocityResults, plot_exp=False,) 
                    label='Exp. run 15')
 
     ax.set_xscale('log')
+    ax.set_xlim(res.velocities[0], res.velocities[-1])
     ax.set_ylim(0, 1.1)
 
     ax.set_xlabel('Friction velocity [m/s]')
     ax.set_ylabel('Remaining fraction after 1s')
 
-    ax.grid(axis='x', which='both')
-    ax.grid(axis='y', which='major')
+    ax.grid(axis='x', which='both', zorder=0)
+    ax.grid(axis='y', which='major', zorder=0)
 
     fig.tight_layout()
 
