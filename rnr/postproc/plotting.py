@@ -5,7 +5,7 @@ from numpy.typing import NDArray
 
 from ..core.distribution import AdhesionDistribution, SizeDistribution
 from ..core.flow import Flow
-from ..postproc.results import TemporalResults
+from ..postproc.results import TemporalResults, FractionVelocityResults
 from ..utils.misc import read_exp_data
 
 
@@ -261,19 +261,18 @@ def plot_validity_domain(modes: list[float], target_vel: float, viscosity: float
     fig.savefig('figs/validity_domain.png', dpi=300)
     plt.close(fig)
 
-def plot_fraction_velocity_curve(velocities: NDArray, fraction: NDArray, plot_exp=False,) -> None:
+def plot_fraction_velocity_curve(res: FractionVelocityResults, plot_exp=False,) -> None:
     """
     Basic plot of the fraction-velocity curve.
 
     Args:
-        velocities (NDArray): Array of velocities.
-        fraction (NDArray): Array of remaining fractions.
+        res (FractionVelocityResults): FractionVelocityResults object.
         plot_exp (bool, optional): If True, plot experimental values from Reeks and Hall (2001).
     """
     # Plot
     fig, ax = plt.subplots(figsize=(6, 4))
 
-    ax.plot(velocities, fraction, color='r',)
+    ax.plot(res.velocities, res.fraction, color='r',)
 
     # Load Reeks and Hall data
     if plot_exp:

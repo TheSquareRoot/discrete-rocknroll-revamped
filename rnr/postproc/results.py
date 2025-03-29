@@ -20,6 +20,7 @@ class Results:
         self.adh_distrib = adh_distrib
         self.size_distrib = size_distrib
 
+
 class TemporalResults(Results):
     def __init__(self,
                  adh_distrib: AdhesionDistribution,
@@ -100,3 +101,16 @@ class TemporalResults(Results):
 
         fig.savefig(f'figs/remaining_fraction.png', dpi=300)
         plt.close(fig)
+
+
+class FractionVelocityResults(Results):
+    def __init__(self,
+                 adh_distrib: AdhesionDistribution,
+                 size_distrib: SizeDistribution,
+                 fraction: NDArray[np.floating],
+                 velocities: NDArray[np.floating],
+                 ) -> None:
+        super().__init__(adh_distrib, size_distrib)
+        self.fraction = fraction
+        self.velocities = velocities
+

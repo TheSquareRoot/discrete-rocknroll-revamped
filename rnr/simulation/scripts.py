@@ -16,7 +16,7 @@ from rnr.postproc.plotting import (plot_adhesion_distribution,
                                    plot_instant_rate,
                                    plot_fraction_velocity_curve
                                    )
-from rnr.postproc.results import TemporalResults
+from rnr.postproc.results import TemporalResults, FractionVelocityResults
 from rnr.utils.misc import read_exp_data
 
 
@@ -142,5 +142,9 @@ def fraction_velocity_curve(config_file: str) -> None:
         # Store the final fraction
         fraction[i] = 1 - res.resuspended_fraction[-1]
 
+    # Store results and plot the fraction-velocity curves
+    res = FractionVelocityResults(adh_distrib, size_distrib, fraction, velocities,)
+    res.name = config['info']['short_name']
+
     # Plot the curve
-    plot_fraction_velocity_curve(velocities, fraction, plot_exp=(config_file == 'reeks'))
+    plot_fraction_velocity_curve(res, plot_exp=(config_file == 'reeks'))
