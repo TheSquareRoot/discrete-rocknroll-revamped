@@ -4,14 +4,21 @@ import numpy as np
 from ..core.distribution import AdhesionDistribution, SizeDistribution
 from ..core.flow import Flow
 from ..postproc.results import Results
-from ..utils.misc import rplus
+
 
 # ======================================================================================================================
 # DISTRIBUTION PLOTS
 # ======================================================================================================================
 
 def plot_size_distribution(size_distrib: SizeDistribution, name: str, scale: str = 'linear',**kwargs) -> None:
-    """Basic bar plot of the size distribution."""
+    """
+    Basic bar plot of the size distribution.
+
+    Args:
+        size_distrib (SizeDistribution): Size distribution to plot.
+        name (str): Name of the configuration file. Will be used to save the figure in the right folder.
+        scale (str, optional): Scale of the x_axis. Defaults to 'linear'.
+    """
     fig, ax = plt.subplots(figsize=(6, 4))
 
     ax.bar(size_distrib.radii, size_distrib.weights, **kwargs)
@@ -30,7 +37,16 @@ def plot_size_distribution(size_distrib: SizeDistribution, name: str, scale: str
     plt.close(fig)
 
 def plot_adhesion_distribution(adh_distrib: AdhesionDistribution, name: str, i: int, norm: bool = True, scale: str = 'log', **kwargs) -> None:
-    """Basic plot of the adhesion distribution of the i-th size bin."""
+    """
+    Basic plot of the adhesion distribution of the i-th size bin.
+
+    Args:
+        adh_distrib (AdhesionDistribution): Adhesion distribution to plot.
+        name (str): Name of the configuration file. Will be used to save the figure in the right folder.
+        i (int): Index of the size bin.
+        norm (bool, optional): Whether to normalize the adhesion forces. Defaults to True.
+        scale (str, optional): Scale of the x-axis. Defaults to 'log'.
+    """
     fig, ax = plt.subplots(figsize=(6, 4))
 
     if norm:
@@ -64,7 +80,13 @@ def plot_adhesion_distribution(adh_distrib: AdhesionDistribution, name: str, i: 
 # ======================================================================================================================
 
 def plot_velocity_history(flow: Flow, scale: str = 'linear', **kwargs) -> None:
-    """Basic plot of the time history of friction velocity."""
+    """
+    Basic plot of the time history of friction velocity.
+
+    Args:
+        flow (Flow): Flow containing the velocity time history.
+        scale (str, optional): Scale of the x-axis. Defaults to 'linear'.
+    """
     fig, ax = plt.subplots(figsize=(6, 4))
 
     ax.plot(flow.time, flow.velocity, **kwargs)
@@ -80,7 +102,15 @@ def plot_velocity_history(flow: Flow, scale: str = 'linear', **kwargs) -> None:
     plt.close(fig)
 
 def plot_flow(flow: Flow, name: str, i: int, scale: str = 'linear', **kwargs) -> None:
-    """Basic plot of all the time dependant quantities of a flow for the i-th size bin."""
+    """
+    Basic plot of all the time dependant quantities of a flow for the i-th size bin.
+
+    Args:
+        flow (Flow): Flow containing the velocity time history.
+        name (str): Name of the configuration file. Will be used to save the figure in the right folder.
+        i (int): Index of the size bin.
+        scale (str, optional): Scale of the x-axis. Defaults to 'linear'.
+    """
     # Create subplots
     fig, axs = plt.subplots(2, 2, sharex=True, )
     axs[1, 0].sharey(axs[1, 1])
@@ -103,6 +133,8 @@ def plot_flow(flow: Flow, name: str, i: int, scale: str = 'linear', **kwargs) ->
         ax.set_xlim(left=0, right=flow.time[-1])
         ax.set_ylim(bottom=0)
 
+        ax.set_xscale(scale)
+
         # Grids
         ax.grid(True)
 
@@ -116,6 +148,14 @@ def plot_flow(flow: Flow, name: str, i: int, scale: str = 'linear', **kwargs) ->
 # ======================================================================================================================
 
 def plot_resuspended_fraction(results: list[Results], name: str, scale: str = 'log',) -> None:
+    """
+    Basic plot of the resuspended fraction with time. Can take several simulation results.
+
+    Args:
+        results (list[Results]): List of simulation result objects.
+        name (str): Name of the configuration file. Will be used to save the figure in the right folder.
+        scale (str, optional): Scale of the x-axis. Defaults to 'log'.
+    """
     fig, ax = plt.subplots(figsize=(6, 5))
 
     for res in results:
@@ -146,7 +186,16 @@ def plot_resuspended_fraction(results: list[Results], name: str, scale: str = 'l
     fig.savefig(f'figs/{name}/resuspended_fraction.png', dpi=300)
     plt.close(fig)
 
-def plot_instant_rate(results: list[Results], name: str, scale: str = 'log',) -> None:
+def plot_instant_rate(results: list[Results], name: str, xscale: str = 'log', yscale: str = 'log',) -> None:
+    """
+    Basic plot of the instant resuspension rate with time. Can take several simulation results.
+
+    Args:
+        results (list[Results]): List of simulation result objects.
+        name (str): Name of the configuration file. Will be used to save the figure in the right folder.
+        xscale (str, optional): Scale of the x-axis. Defaults to 'log'.
+        yscale (str, optional): Scale of the y-axis. Defaults to 'log'.
+    """
     fig, ax = plt.subplots(figsize=(6, 5))
 
     for res in results:
@@ -156,8 +205,8 @@ def plot_instant_rate(results: list[Results], name: str, scale: str = 'log',) ->
     ax.set_ylabel('Resuspension rate')
     ax.legend()
 
-    ax.set_xscale(scale)
-    ax.set_yscale('log')
+    ax.set_xscale(xscale)
+    ax.set_yscale(yscale)
     ax.set_xlim(results[0].time[1], results[0].time[-1])
     ax.set_ylim(bottom=1e-10, top=1e0)
 
