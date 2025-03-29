@@ -4,6 +4,7 @@ import numpy as np
 from ..core.distribution import AdhesionDistribution, SizeDistribution
 from ..core.flow import Flow
 from ..postproc.results import Results
+from ..utils.misc import rplus
 
 # ======================================================================================================================
 # DISTRIBUTION PLOTS
@@ -166,4 +167,44 @@ def plot_instant_rate(results: list[Results], name: str, scale: str = 'log',) ->
     fig.tight_layout()
 
     fig.savefig(f'figs/{name}/instant_rate.png', dpi=300)
+    plt.close(fig)
+
+# ======================================================================================================================
+# OTHER PLOTS
+# ======================================================================================================================
+
+def plot_validity_domain(modes: list[float], target_vel: float, viscosity: float,) -> None:
+    # Defined the radius and velocity ranges
+    velocities = np.linspace(0.1, 1.0, 100)
+    radii = np.logspace(np.log10(1.0), np.log10(50.0), 100)
+
+    # Create mesh for contour plotting
+    U, R = np.meshgrid(velocities, radii)
+
+    # Compute the r+ grid
+    R_plus = (R * 1e-6) * U / viscosity
+
+    # Create the plot
+    fig, ax = plt.subplots(figsize=(6, 5))
+    contour = ax.contourf(U, R, R_plus, cmap='magma', levels=20)
+    cbar = fig.colorbar(contour, ax=ax)
+
+    # Add isolines for r+ = 1.8 and r+ = 2.5
+    isolines = ax.contour(U, R, R_plus, levels=[1.8, 2.5], colors=['white', 'red'], linestyles=['dashed', 'solid'])
+    ax.clabel(isolines, inline=True, fontsize=8, fmt={1.8: '1.8', 2.5: '2.5'})
+
+    # Add modes
+    for mode in modes:
+        ax.scatter(target_vel, mode, color='white', marker='x',)
+
+    # Labels and formatting
+    ax.set_xlabel("Friction Velocity $u^*$ [m/s]")
+    ax.set_ylabel("Particle Radius $r$ [µm]")
+    cbar.set_label("$r^+$")
+
+    #ax.set_yscale('log')  # Log scale for r (optional)
+
+    fig.tight_layout()
+
+    fig.savefig('figs/validity_domain.png', dpi=300)
     plt.close(fig)

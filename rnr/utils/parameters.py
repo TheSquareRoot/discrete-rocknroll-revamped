@@ -2,6 +2,7 @@ import sys
 import toml
 
 from .config import setup_logging
+from ..postproc.plotting import plot_validity_domain
 from ..utils.misc import rplus
 
 
@@ -60,4 +61,4 @@ def check_config(config):
 
     # Check whether the hypothesis of the RnR model are respected
     check_model_validity(config)
-
+    plot_validity_domain(config['sizedistrib']['modes'], config['simulation']['target_vel'], config['physics']['viscosity'])
