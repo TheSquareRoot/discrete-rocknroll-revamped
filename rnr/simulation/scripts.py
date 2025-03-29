@@ -14,6 +14,7 @@ from rnr.postproc.plotting import (plot_adhesion_distribution,
                                    plot_flow,
                                    plot_resuspended_fraction,
                                    plot_instant_rate,
+                                   plot_fraction_velocity_curve
                                    )
 from rnr.postproc.results import Results
 from rnr.utils.misc import read_exp_data
@@ -103,6 +104,7 @@ def multiple_runs(config_dir: str,) -> None:
         path = f"{config_dir}/{config_file.split('.')[0]}"
         results.append(single_run(path))
 
+    # Plot the results of all simulations on the same graph
     plot_resuspended_fraction(results, name='multi',)
     plot_instant_rate(results, name='multi',)
 
@@ -122,17 +124,17 @@ def fraction_velocity_curve(config_file: str) -> None:
     size_distrib, adh_distrib = _build_distribs(size_params, adh_params, plot=False)
 
     # Generate a range of velocities to build the validation fraction-velocity curve
-    target_velocities = np.logspace(np.log10(0.1), np.log10(10), 40)
-    fraction = np.zeros_like(target_velocities)
+    velocities = np.logspace(np.log10(0.05), np.log10(10), 60)
+    fraction = np.zeros_like(velocities)
     flow_params = {**config['simulation'], **config['physics']}
 
-    for i in range(target_velocities.shape[0]):
+    for i in range(velocities.shape[0]):
         # Generate a flow with the given target velocity
-        flow_params['target_vel'] = target_velocities[i]
+        flow_params['target_vel'] = velocities[i]
         flow = _build_flow(size_distrib, flow_params, plot=False)
 
         # Run the simulation
-        logger.info(f'Running simulation {i+1}/{target_velocities.shape[0]}...')
+        logger.info(f'Running simulation {i+1}/{velocities.shape[0]}...')
         sim = Simulation(size_distrib, adh_distrib, flow)
         res = sim.run()
         logger.info('Done.')
@@ -140,28 +142,5 @@ def fraction_velocity_curve(config_file: str) -> None:
         # Store the final fraction
         fraction[i] = 1 - res.resuspended_fraction[-1]
 
-    # Load Reeks and Hall data
-    exp_data = read_exp_data()
-
-    # Plot
-    fig, ax = plt.subplots(figsize=(6, 4))
-
-    ax.plot(target_velocities, fraction, color='r')
-
-    ax.scatter(exp_data[10][9][0], exp_data[10][9][1], color='blue', marker='^', facecolors='none', label='Exp. run 9')
-    ax.scatter(exp_data[10][10][0], exp_data[10][10][1], color='black', marker='s', facecolors='none', label='Exp. run 10')
-    ax.scatter(exp_data[10][15][0], exp_data[10][15][1], color='red', marker='o', facecolors='none', label='Exp. run 15')
-
-    ax.set_xscale('log')
-    ax.set_ylim(0, 1.1)
-
-    ax.set_xlabel('Friction velocity [m/s]')
-    ax.set_ylabel('Remaining fraction after 1s')
-
-    ax.grid(axis='x', which='both')
-    ax.grid(axis='y', which='major')
-
-    fig.tight_layout()
-
-    fig.savefig('figs/validation.png', dpi=300)
-    plt.close(fig)
+    # Plot the curve
+    plot_fraction_velocity_curve(velocities, fraction, plot_exp=(config_file == 'reeks'))

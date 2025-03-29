@@ -1,9 +1,12 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
+from numpy.typing import NDArray
+
 from ..core.distribution import AdhesionDistribution, SizeDistribution
 from ..core.flow import Flow
 from ..postproc.results import Results
+from ..utils.misc import read_exp_data
 
 
 # ======================================================================================================================
@@ -256,4 +259,42 @@ def plot_validity_domain(modes: list[float], target_vel: float, viscosity: float
     fig.tight_layout()
 
     fig.savefig('figs/validity_domain.png', dpi=300)
+    plt.close(fig)
+
+def plot_fraction_velocity_curve(velocities: NDArray, fraction: NDArray, plot_exp=False,) -> None:
+    """
+    Basic plot of the fraction-velocity curve.
+
+    Args:
+        velocities (NDArray): Array of velocities.
+        fraction (NDArray): Array of remaining fractions.
+        plot_exp (bool, optional): If True, plot experimental values from Reeks and Hall (2001).
+    """
+    # Plot
+    fig, ax = plt.subplots(figsize=(6, 4))
+
+    ax.plot(velocities, fraction, color='r',)
+
+    # Load Reeks and Hall data
+    if plot_exp:
+        exp_data = read_exp_data()
+        ax.scatter(exp_data[10][9][0], exp_data[10][9][1], color='blue', marker='^', facecolors='none',
+                   label='Exp. run 9')
+        ax.scatter(exp_data[10][10][0], exp_data[10][10][1], color='black', marker='s', facecolors='none',
+                   label='Exp. run 10')
+        ax.scatter(exp_data[10][15][0], exp_data[10][15][1], color='red', marker='o', facecolors='none',
+                   label='Exp. run 15')
+
+    ax.set_xscale('log')
+    ax.set_ylim(0, 1.1)
+
+    ax.set_xlabel('Friction velocity [m/s]')
+    ax.set_ylabel('Remaining fraction after 1s')
+
+    ax.grid(axis='x', which='both')
+    ax.grid(axis='y', which='major')
+
+    fig.tight_layout()
+
+    fig.savefig('figs/validation.png', dpi=300)
     plt.close(fig)
