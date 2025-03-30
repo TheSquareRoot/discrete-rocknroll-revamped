@@ -209,7 +209,7 @@ class AdhesionDistributionBuilder:
                  fmax: float,
                  dist_params: str,
                  adhesion_model: str,
-                 means: list[float] = None,
+                 medians: list[float] = None,
                  spreads: list[float] = None,
                  surface_energy: float = None,
                  asperity_radius: float = None,
@@ -221,7 +221,7 @@ class AdhesionDistributionBuilder:
         self.nbins = nbins
         self.fmax = fmax
         self.dist_params = dist_params
-        self.means = means
+        self.medians = medians
         self.spreads = spreads
 
         self.adhesion_model = adhesion_model
@@ -230,24 +230,24 @@ class AdhesionDistributionBuilder:
         self.peaktopeak = peaktopeak
 
     def _compute_distribution_params(self, radii: NDArray[np.floating],) -> tuple:
-        """Wrapper to set the correct distribution means and spreads."""
+        """Wrapper to set the correct distribution medians and spreads."""
         if self.dist_params == 'biasi':
             return biasi_params(radii,)
         elif self.dist_params == 'custom':
             # Distinguish between the spread and no spread case.
-            # If there is a radius spread, it is unlikely the user will provide means and spreads for each size bin
+            # If there is a radius spread, it is unlikely the user will provide medians and spreads for each size bin
             # So instead, values have to be derived from the user inputs.
             # If only set of parameters is used, it is applied to all size bins
-            if len(self.means) == 1:
-                return (np.ones(self.size_distrib.nbins) * self.means[0],
+            if len(self.medians) == 1:
+                return (np.ones(self.size_distrib.nbins) * self.medians[0],
                         np.ones(self.size_distrib.nbins) * self.spreads[0])
             # If there as many sets of params are modes, one set is assigned to each mode
-            elif len(self.means) == self.size_distrib.nmodes:
+            elif len(self.medians) == self.size_distrib.nmodes:
                 #TODO: implement what happens when a set of parameters are provided for each mode
                 pass
             # Otherwise wtf are they doing anyway
             else:
-                raise ValueError(f'Inccorrect number of parameters provided: {len(self.means)}')
+                raise ValueError(f'Inccorrect number of parameters provided: {len(self.medians)}')
         else:
             raise ValueError(f'Unknown distribution parameter {self.dist_params}')
 
