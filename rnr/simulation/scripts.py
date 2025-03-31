@@ -14,7 +14,8 @@ from rnr.postproc.plotting import (plot_adhesion_distribution,
                                    plot_flow,
                                    plot_resuspended_fraction,
                                    plot_instant_rate,
-                                   plot_fraction_velocity_curve
+                                   plot_fraction_velocity_curve,
+                                   plot_fraction_derivative,
                                    )
 from rnr.postproc.results import TemporalResults, FractionVelocityResults
 from rnr.utils.misc import read_exp_data
@@ -148,5 +149,6 @@ def fraction_velocity_curve(config_file: str) -> None:
 
     # Plot the curve
     plot_fraction_velocity_curve(res, plot_exp=(config_file == 'reeks'))
+    plot_fraction_derivative(res,)
     print(f'Critical threshold velocity (50%): {res.threshold_velocity(0.5):.2f}m/s')
     print(f'Resuspension range: {res.resuspension_range:.2f}m/s')

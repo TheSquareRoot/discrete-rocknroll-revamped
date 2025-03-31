@@ -125,7 +125,34 @@ class FractionVelocityResults(Results):
 
         return high_thresh - low_thresh
 
-    def threshold_velocity(self, fraction: float) -> float:
+    @property
+    def fraction_derivative(self,):
+        """
+        Computes the velocity derivative of the fraction using finite differences.
+
+        Args:
+            velocities (np.ndarray): Array of velocity values (must be sorted in ascending order).
+            fractions (np.ndarray): Array of fraction values corresponding to the velocities.
+
+        Returns:
+            np.ndarray: Array of derivative values (same length as velocities, using central differences where possible).
+        """
+        if len(self.velocities) != len(self.fraction):
+            raise ValueError("Velocity and fraction arrays must have the same length.")
+
+        # Compute derivative using central differences for the interior points
+        df_dv = np.zeros_like(self.fraction)
+        df_dv[1:-1] = (self.fraction[2:] - self.fraction[:-2]) / (self.velocities[2:] - self.velocities[:-2])
+
+        # Use forward difference for the first point
+        df_dv[0] = (self.fraction[1] - self.fraction[0]) / (self.velocities[1] - self.velocities[0])
+
+        # Use backward difference for the last point
+        df_dv[-1] = (self.fraction[-1] - self.fraction[-2]) / (self.velocities[-1] - self.velocities[-2])
+
+        return np.abs(df_dv)
+
+    def threshold_velocity(self, fraction: float) -> np.floating:
         """
         Computes the velocity at which k% of the particles have been resuspended.
 

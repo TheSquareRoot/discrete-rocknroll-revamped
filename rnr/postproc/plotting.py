@@ -6,7 +6,7 @@ from numpy.typing import NDArray
 from ..core.distribution import AdhesionDistribution, SizeDistribution
 from ..core.flow import Flow
 from ..postproc.results import TemporalResults, FractionVelocityResults
-from ..utils.misc import read_exp_data
+from ..utils.misc import read_exp_data, log_norm
 
 
 # ======================================================================================================================
@@ -305,4 +305,25 @@ def plot_fraction_velocity_curve(res: FractionVelocityResults, plot_exp=False, p
     fig.tight_layout()
 
     fig.savefig('figs/validation.png', dpi=300)
+    plt.close(fig)
+
+def plot_fraction_derivative(res: FractionVelocityResults,) -> None:
+    # Plot
+    fig, ax = plt.subplots(figsize=(6, 4))
+
+    med = 0.93
+    spread = 1.72
+
+    lognormfit = np.array([
+        log_norm(vel, med, spread) for vel in res.velocities
+    ])
+
+    ax.plot(res.velocities, res.fraction_derivative, color='r', zorder=10)
+    ax.plot(res.velocities, lognormfit, color='b', linestyle='--', zorder=10)
+
+    #ax.set_xscale('log')
+
+    fig.tight_layout()
+
+    fig.savefig('figs/fraction_derivative.png', dpi=300)
     plt.close(fig)
