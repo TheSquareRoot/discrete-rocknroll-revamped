@@ -3,12 +3,12 @@ full_name = 'reeks'
 short_name = 'reeks'
 
 [adhdistrib]
-nbins   = 1000
-fmax = 20.0
+nbins   = 5000
+fmax = 30.0
 
 dist_params  = 'biasi'
-medians = [ 1.0, 1.0 ]
-spreads = [ 1.0, 1.0 ]
+medians = [ 0.01047, ]
+spreads = [ 20.0, ]
 
 [sizedistrib]
 nbins = 50
@@ -28,8 +28,8 @@ acc_time = 0.0
 [physics]
 adhesion_model = 'JKR'
 
-density = 1.92
-viscosity = 1.96e-5
+density = 1.181
+viscosity = 1.539e-5
 surface_energy = 0.56
 
 # Parameters of the aerodynamic quantities model
