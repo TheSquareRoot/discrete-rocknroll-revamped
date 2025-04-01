@@ -137,7 +137,7 @@ def fraction_velocity_curve(config_file: str) -> None:
         # Run the simulation
         logger.info(f'Running simulation {i+1}/{velocities.shape[0]}...')
         sim = Simulation(size_distrib, adh_distrib, flow)
-        res = sim.run()
+        res = sim.run(config['simulation']['vectorized'])
         logger.info('Done.')
 
         # Store the final fraction

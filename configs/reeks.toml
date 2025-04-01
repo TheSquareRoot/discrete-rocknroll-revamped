@@ -25,6 +25,8 @@ dt = 1e-3
 target_vel = 0.9
 acc_time = 0.0
 
+vectorized = true
+
 [physics]
 adhesion_model = 'JKR'
 
