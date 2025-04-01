@@ -17,6 +17,8 @@ class Flow:
                  velocity: NDArray[np.floating],
                  lift: NDArray[np.floating],
                  drag: NDArray[np.floating],
+                 faero: NDArray[np.floating],
+                 fluct_var: NDArray[np.floating],
                  burst: NDArray[np.floating],
                  time: NDArray[np.floating],
                  ) -> None:
@@ -24,6 +26,8 @@ class Flow:
         self.velocity = velocity
         self.lift = lift
         self.drag = drag
+        self.faero = faero
+        self.fluct_var = fluct_var
         self.burst = burst
         self.time = time
 
@@ -41,10 +45,6 @@ class Flow:
     def nsteps(self,) -> int:
         return len(self.time)
 
-    @property
-    def faero(self,) -> NDArray[np.floating]:
-        return 0.5 * self.lift + 100 * self.drag
-
 
 class FlowBuilder:
     def __init__(self,
@@ -56,6 +56,7 @@ class FlowBuilder:
                  acc_time: float,
                  density: float,
                  viscosity: float,
+                 frms: float,
                  **kwargs,
                  ) -> None:
 
@@ -73,6 +74,9 @@ class FlowBuilder:
         self.density = density
         self.viscosity = viscosity
 
+        # Aerodynamic coeffs
+        self.frms = frms
+
     def generate(self,) -> Flow:
         # First generate the time array
         time = np.arange(0.0, self.duration, self.dt)
@@ -86,12 +90,16 @@ class FlowBuilder:
         # Compute aerodynamic quantities
         lift = self.aeromodel.lift(velocity, self.size_distrib.radii_meter)
         drag = self.aeromodel.drag(velocity, self.size_distrib.radii_meter)
+        faero = 0.5 * lift + 100 * drag
+        fluct_var = (self.frms * faero) ** 2
         burst = self.aeromodel.burst(velocity, )
 
         # Instantiate the flow class
         flow = Flow(velocity,
                     lift,
                     drag,
+                    faero,
+                    fluct_var,
                     burst,
                     time,
                     )
