@@ -44,7 +44,7 @@ class Simulation:
             # requires more memory
             if vectorized:
                 logger.debug('Vectorized simulation chosen.')
-                rate = resusp_model.rate_vectorized()
+                rate = resusp_model.rate()
 
                 for t in range(self.flow.nsteps-1):
                     counts[t+1,:,:] = np.maximum(counts[t,:,:] * (1 - rate[t,:,:] * dt), 0)
