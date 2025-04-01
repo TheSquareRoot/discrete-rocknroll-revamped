@@ -3,7 +3,7 @@ import numpy as np
 from rnr.utils.config import setup_logging, setup_progress_bar
 from rnr.core.distribution import AdhesionDistribution, SizeDistribution
 from rnr.core.flow import Flow
-from rnr.core.model import RocknRollModel
+from rnr.core.model import RocknRollModel, NonGaussianRocknRollModel
 from rnr.postproc.results import TemporalResults
 
 
@@ -22,14 +22,19 @@ class Simulation:
         self.adh_distrib = adh_distrib
         self.flow = flow
 
-    def run(self, vectorized: bool = False) -> TemporalResults:
+    def run(self, model: str, vectorized: bool = False) -> TemporalResults:
         # Build population array
         logger.info('Building population array...')
         counts = np.zeros([self.flow.nsteps, self.size_distrib.nbins, self.adh_distrib.nbins])
         counts[0,:,:] = self.size_distrib.weights[:, None] * self.adh_distrib.weights
 
-        # Instantiate the resuspension model
-        resusp_model = RocknRollModel(self.size_distrib, self.adh_distrib, self.flow)
+        # Chose which resuspension model to use
+        if model == 'RnR':
+            resusp_model = RocknRollModel(self.size_distrib, self.adh_distrib, self.flow)
+        elif model == 'NG_RnR':
+            resusp_model = NonGaussianRocknRollModel(self.size_distrib, self.adh_distrib, self.flow)
+        else:
+            raise NotImplementedError
 
         dt = self.flow.time[1] - self.flow.time[0]
 

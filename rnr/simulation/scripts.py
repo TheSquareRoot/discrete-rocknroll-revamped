@@ -83,7 +83,7 @@ def single_run(config_file: str,) -> TemporalResults:
     # Build a simulation and run it
     logger.info('Running simulation...')
     sim = Simulation(size_distrib, adh_distrib, flow)
-    res = sim.run(config['simulation']['vectorized'])
+    res = sim.run(config['physics']['resuspension_model'], config['simulation']['vectorized'])
     res.name = config['info']['short_name']
     logger.info('Done.')
 
@@ -137,7 +137,7 @@ def fraction_velocity_curve(config_file: str) -> None:
         # Run the simulation
         logger.info(f'Running simulation {i+1}/{velocities.shape[0]}...')
         sim = Simulation(size_distrib, adh_distrib, flow)
-        res = sim.run(config['simulation']['vectorized'])
+        res = sim.run(config['physics']['resuspension_model'], config['simulation']['vectorized'])
         logger.info('Done.')
 
         # Store the final fraction

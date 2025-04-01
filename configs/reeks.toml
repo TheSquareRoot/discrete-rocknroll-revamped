@@ -29,6 +29,7 @@ vectorized = true
 
 [physics]
 adhesion_model = 'JKR'
+resuspension_model = 'RnR'
 
 density = 1.181
 viscosity = 1.539e-5

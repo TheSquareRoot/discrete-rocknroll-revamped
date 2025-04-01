@@ -30,18 +30,21 @@ class ResuspensionModel:
 
 
 class RocknRollModel(ResuspensionModel):
+    @staticmethod
+    def compute_rate(burst: NDArray[np.floating],
+                     fluct: NDArray[np.floating],
+                     fluct_var: NDArray[np.floating]) -> NDArray[np.floating]:
+
+        # Compute the resuspension rate
+        rate = burst * np.exp(- (fluct ** 2) / (2 * fluct_var)) / (
+                    0.5 * (1 + erf(fluct / np.sqrt(2 * fluct_var))))
+
+        # Makes sure the rate is never superior to the burst frequency
+        rate = np.minimum(rate, burst)
+
+        return rate
 
     def rate(self, t: int = None,):
-        """
-        Computes the resuspension rate using the quasi-static formulation of the Rock'n'Roll model.
-
-        Args:
-            t (int, optional): The time-step at which to compute the rate. Defaults to None.
-
-        Returns:
-            rate (NDArray): If a timestep is provided, the rate at time t is returned. Otherwise, the whole rate array
-                            is computed an returned.
-        """
         if t is None: # Sequential case
             fadh = np.tile(self.adh_distrib.fadh, (self.flow.nsteps, 1, 1))
             faero = np.tile(self.flow.faero, (self.adh_distrib.nbins, 1, 1)).transpose(1, 2, 0)
@@ -57,11 +60,12 @@ class RocknRollModel(ResuspensionModel):
         # Compute the aerodynamic fluctuation at detachment, and the variance of force fluctations
         fluct = fadh - faero
 
-        # Compute the resuspension rate
-        rate = burst * np.exp(- (fluct ** 2) / (2 * fluct_var)) / (
-                    0.5 * (1 + erf(fluct / np.sqrt(2 * fluct_var))))
+        return self.compute_rate(burst, fluct, fluct_var)
 
-        # Makes sure the rate is never superior to the burst frequency
-        rate = np.minimum(rate, burst)
 
-        return rate
+class NonGaussianRocknRollModel(RocknRollModel):
+    @staticmethod
+    def compute_rate(burst: NDArray[np.floating],
+                     fluct: NDArray[np.floating],
+                     fluct_var: NDArray[np.floating]) -> NDArray[np.floating]:
+        pass
