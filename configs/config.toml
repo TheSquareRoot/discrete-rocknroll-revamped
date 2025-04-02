@@ -3,10 +3,10 @@ full_name = 'd20_spread1_u02_acc_JKR'
 short_name = 'D20'
 
 [adhdistrib]
-nbins = 2000
+nbins = 5000
 fmax = 20.0
 
-dist_params  = 'custom'
+dist_params  = 'biasi'
 medians = [ 0.0079, ]
 spreads = [ 6.2592, ]
 
@@ -14,18 +14,19 @@ spreads = [ 6.2592, ]
 nbins = 1
 width = 3.0
 
-modes   = [ 10.0, ]
+modes   = [ 5.0, ]
 spreads = [ 0.0, ]
 weights = [ 1.0, ]
 
 [simulation]
-duration = 1.0
-dt = 1e-3
+duration = 10.0
+dt = 5e-4
 
 target_vel = 0.5
-acc_time = 0.1
+acc_time = 2.0
+transition = 'smooth'
 
-vectorized = true
+vectorized = false
 
 [physics]
 adhesion_model = 'JKR'

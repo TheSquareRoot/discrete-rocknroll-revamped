@@ -54,6 +54,7 @@ class FlowBuilder:
                  dt: float,
                  target_vel:  float,
                  acc_time: float,
+                 transition: str,
                  density: float,
                  viscosity: float,
                  frms: float,
@@ -69,6 +70,7 @@ class FlowBuilder:
         self.dt = dt
         self.target_vel = target_vel
         self.acc_time = acc_time
+        self.transition = transition
 
         # Physical quantities
         self.density = density
@@ -83,7 +85,11 @@ class FlowBuilder:
 
         # Then compute the velocity as a function of time
         if self.acc_time != 0.0:
-            velocity = np.clip((self.target_vel / self.acc_time) * time, 0, self.target_vel)
+            if self.transition == 'smooth':
+                scaled_time = np.minimum(time / self.acc_time, 1)
+                velocity = self.target_vel * (scaled_time**2 * (3 - 2 * scaled_time))
+            else:
+                velocity = np.clip((self.target_vel / self.acc_time) * time, 0, self.target_vel)
         else:
             velocity = np.ones_like(time) * self.target_vel
 
