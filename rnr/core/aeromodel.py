@@ -69,5 +69,5 @@ class BaseAeroModel(AeroModel):
     def burst(self,
              velocity: NDArray[np.floating],
              ) -> NDArray[np.floating]:
-        return self.burst_coeff * 0.00658 * (velocity ** 2) / self.viscosity
+        return self.burst_coeff * (velocity ** 2) / self.viscosity
 

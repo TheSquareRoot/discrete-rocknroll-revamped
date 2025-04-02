@@ -41,6 +41,6 @@ drag_coeff = 1.0
 lift_coeff = 1.0
 lift_power = 2.31
 
-burst_coeff = 1.0
+burst_coeff = 0.0413
 
 frms = 0.2
