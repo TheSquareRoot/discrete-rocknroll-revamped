@@ -43,13 +43,13 @@ class RocknRollModel(ResuspensionModel):
         return rate
 
     def rate(self, flow: Flow, t: int = None,):
-        if t is None: # Sequential case
+        if t is None: # Vectorized case
             fadh = np.tile(self.adh_distrib.fadh, (flow.nsteps, 1, 1))
             faero = np.tile(flow.faero, (self.adh_distrib.nbins, 1, 1)).transpose(1, 2, 0)
             fluct_var = np.tile(flow.fluct_var, (self.adh_distrib.nbins, 1, 1)).transpose(1, 2, 0)
             burst = np.tile(flow.burst[:, np.newaxis, np.newaxis],
                                   (1, self.size_distrib.nbins, self.adh_distrib.nbins))
-        else: # Vectorized case
+        else: # Sequential case
             fadh = self.adh_distrib.fadh
             faero = np.tile(flow.faero[t, :].reshape(-1, 1), (1, self.adh_distrib.nbins))
             fluct_var = np.tile(flow.fluct_var[t, :].reshape(-1, 1), (1, self.adh_distrib.nbins))
