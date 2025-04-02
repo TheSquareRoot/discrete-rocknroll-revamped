@@ -5,6 +5,7 @@ from numpy.typing import NDArray
 
 from ..core.distribution import AdhesionDistribution, SizeDistribution
 from ..core.flow import Flow
+from ..core.model import ResuspensionModel
 from ..postproc.results import TemporalResults, FractionVelocityResults
 from ..utils.misc import read_exp_data, log_norm
 
@@ -326,4 +327,18 @@ def plot_fraction_derivative(res: FractionVelocityResults,) -> None:
     fig.tight_layout()
 
     fig.savefig('figs/fraction_derivative.png', dpi=300)
+    plt.close(fig)
+
+def plot_resuspension_rate(model: ResuspensionModel, flow: Flow, ) -> None:
+    # Get the resuspension at the last time step
+    rate = model.rate(flow, -1)
+
+    # Plot
+    fig, ax = plt.subplots(figsize=(6, 4))
+
+    ax.plot(model.adh_distrib.fadh_norm[0,:], rate[0,:])
+
+    fig.tight_layout()
+
+    fig.savefig('figs/resusp_rate.png', dpi=300)
     plt.close(fig)
