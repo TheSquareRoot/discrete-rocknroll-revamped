@@ -17,6 +17,7 @@ from rnr.postproc.plotting import (plot_adhesion_distribution,
                                    plot_instant_rate,
                                    plot_fraction_velocity_curve,
                                    plot_fraction_derivative,
+                                   plot_resuspension_rate,
                                    )
 from rnr.postproc.results import TemporalResults, FractionVelocityResults
 
@@ -59,7 +60,7 @@ def _build_flow(size_distrib, flow_params, name=None, plot=False):
 
     return flow
 
-def _build_model(model, size_distrib, adh_distrib, name=None, plot=False):
+def _build_model(model, size_distrib, adh_distrib,):
     # Chose which resuspension model to use
     if model == 'RnR':
         return RocknRollModel(size_distrib, adh_distrib)
@@ -88,7 +89,8 @@ def single_run(config_file: str,) -> TemporalResults:
     # Build the distributions, the flow and the resuspension model
     size_distrib, adh_distrib = _build_distribs(size_params, adh_params, name, plot=True)
     flow = _build_flow(size_distrib, flow_params, name, plot=True)
-    resusp_model = _build_model(config['physics']['resuspension_model'], size_distrib, adh_distrib, name, plot=True)
+    resusp_model = _build_model(config['physics']['resuspension_model'], size_distrib, adh_distrib,)
+    plot_resuspension_rate(resusp_model, flow)
 
     # Build a simulation and run it
     logger.info('Running simulation...')
@@ -133,7 +135,7 @@ def fraction_velocity_curve(config_file: str) -> None:
 
     # Build the distributions
     size_distrib, adh_distrib = _build_distribs(size_params, adh_params, plot=False)
-    resusp_model = _build_model(config['physics']['resuspension_model'], size_distrib, adh_distrib, plot=False)
+    resusp_model = _build_model(config['physics']['resuspension_model'], size_distrib, adh_distrib,)
 
     # Generate a range of velocities to build the validation fraction-velocity curve
     velocities = np.logspace(np.log10(0.05), np.log10(10), 60)

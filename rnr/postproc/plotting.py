@@ -1,5 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.axes import Axes
+from matplotlib.figure import Figure
 
 from numpy.typing import NDArray
 
@@ -14,7 +16,11 @@ from ..utils.misc import read_exp_data, log_norm
 # DISTRIBUTION PLOTS
 # ======================================================================================================================
 
-def plot_size_distribution(size_distrib: SizeDistribution, name: str, scale: str = 'linear',**kwargs) -> None:
+def plot_size_distribution(size_distrib: SizeDistribution,
+                           name: str,
+                           scale: str = 'linear',
+                           **kwargs
+                           ) -> None:
     """
     Basic bar plot of the size distribution.
 
@@ -40,7 +46,13 @@ def plot_size_distribution(size_distrib: SizeDistribution, name: str, scale: str
     fig.savefig(f'figs/{name}/size_distrib.png', dpi=300)
     plt.close(fig)
 
-def plot_adhesion_distribution(adh_distrib: AdhesionDistribution, name: str, i: int, norm: bool = True, scale: str = 'log', **kwargs) -> None:
+def plot_adhesion_distribution(adh_distrib: AdhesionDistribution,
+                               name: str,
+                               i: int,
+                               norm: bool = True,
+                               scale: str = 'log',
+                               **kwargs
+                               ) -> None:
     """
     Basic plot of the adhesion distribution of the i-th size bin.
 
@@ -334,9 +346,16 @@ def plot_resuspension_rate(model: ResuspensionModel, flow: Flow, ) -> None:
     rate = model.rate(flow, -1)
 
     # Plot
-    fig, ax = plt.subplots(figsize=(6, 4))
+    fig = plt.figure(figsize=(6, 4))
+    ax1 = fig.add_subplot(1, 1, 1)
+    ax2 = ax1.twinx()
 
-    ax.plot(model.adh_distrib.fadh_norm[0,:], rate[0,:])
+    ax1.plot(model.adh_distrib.fadh_norm[0,:], rate[0,:]/flow.burst[-1], color='k')
+    ax2.plot(model.adh_distrib.fadh_norm[0,:], model.adh_distrib.weights[0,:], color='r')
+
+    ax1.set_xlim(left=0, right=0.03)
+    ax1.set_ylim(bottom=0, top=0.2)
+    ax2.set_ylim(bottom=0)
 
     fig.tight_layout()
 
