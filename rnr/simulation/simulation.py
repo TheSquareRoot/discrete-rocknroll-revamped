@@ -3,7 +3,7 @@ import numpy as np
 from rnr.utils.config import setup_logging, setup_progress_bar
 from rnr.core.distribution import AdhesionDistribution, SizeDistribution
 from rnr.core.flow import Flow
-from rnr.core.model import RocknRollModel, NonGaussianRocknRollModel
+from rnr.core.model import ResuspensionModel
 from rnr.postproc.results import TemporalResults
 
 
@@ -16,25 +16,19 @@ class Simulation:
                  size_distrib: SizeDistribution,
                  adh_distrib: AdhesionDistribution,
                  flow: Flow,
+                 resusp_model: ResuspensionModel,
                  ) -> None:
 
         self.size_distrib = size_distrib
         self.adh_distrib = adh_distrib
         self.flow = flow
+        self.resusp_model = resusp_model
 
-    def run(self, model: str, vectorized: bool = False) -> TemporalResults:
+    def run(self, vectorized: bool = False) -> TemporalResults:
         # Build population array
         logger.info('Building population array...')
         counts = np.zeros([self.flow.nsteps, self.size_distrib.nbins, self.adh_distrib.nbins])
         counts[0,:,:] = self.size_distrib.weights[:, None] * self.adh_distrib.weights
-
-        # Chose which resuspension model to use
-        if model == 'RnR':
-            resusp_model = RocknRollModel(self.size_distrib, self.adh_distrib, self.flow)
-        elif model == 'NG_RnR':
-            resusp_model = NonGaussianRocknRollModel(self.size_distrib, self.adh_distrib, self.flow)
-        else:
-            raise NotImplementedError
 
         dt = self.flow.time[1] - self.flow.time[0]
 
@@ -49,7 +43,7 @@ class Simulation:
             # requires more memory
             if vectorized:
                 logger.debug('Vectorized simulation chosen.')
-                rate = resusp_model.rate()
+                rate = self.resusp_model.rate(self.flow)
 
                 for t in range(self.flow.nsteps-1):
                     counts[t+1,:,:] = np.maximum(counts[t,:,:] * (1 - rate[t,:,:] * dt), 0)
@@ -60,7 +54,7 @@ class Simulation:
             else:
                 logger.debug('Sequential simulation chosen.')
                 for t in range(self.flow.nsteps-1):
-                    rate = resusp_model.rate(t)
+                    rate = self.resusp_model.rate(self.flow, t)
                     counts[t+1,:,:] = np.maximum(counts[t,:,:] * (1 - rate * dt), 0)
 
                     progress.advance(sim_task)

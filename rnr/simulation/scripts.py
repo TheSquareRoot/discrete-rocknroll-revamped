@@ -8,6 +8,7 @@ from rnr.utils.parameters import check_config, load_config
 from rnr.core.aeromodel import BaseAeroModel
 from rnr.core.distribution import SizeDistributionBuilder, AdhesionDistributionBuilder
 from rnr.core.flow import FlowBuilder
+from rnr.core.model import RocknRollModel, NonGaussianRocknRollModel
 from rnr.simulation.simulation import Simulation
 from rnr.postproc.plotting import (plot_adhesion_distribution,
                                    plot_size_distribution,
@@ -18,7 +19,6 @@ from rnr.postproc.plotting import (plot_adhesion_distribution,
                                    plot_fraction_derivative,
                                    )
 from rnr.postproc.results import TemporalResults, FractionVelocityResults
-from rnr.utils.misc import read_exp_data
 
 
 logger = setup_logging(__name__, 'logs/log.log')
@@ -59,6 +59,15 @@ def _build_flow(size_distrib, flow_params, name=None, plot=False):
 
     return flow
 
+def _build_model(model, size_distrib, adh_distrib, name=None, plot=False):
+    # Chose which resuspension model to use
+    if model == 'RnR':
+        return RocknRollModel(size_distrib, adh_distrib)
+    elif model == 'NG_RnR':
+        return NonGaussianRocknRollModel(size_distrib, adh_distrib)
+    else:
+        raise NotImplementedError
+
 def single_run(config_file: str,) -> TemporalResults:
     # Load utils file
     config = load_config(f"configs/{config_file}.toml")
@@ -76,14 +85,15 @@ def single_run(config_file: str,) -> TemporalResults:
     adh_params = {**config['adhdistrib'], **config['physics']}
     flow_params = {**config['simulation'], **config['physics']}
 
-    # Build the distributions and the flow
+    # Build the distributions, the flow and the resuspension model
     size_distrib, adh_distrib = _build_distribs(size_params, adh_params, name, plot=True)
     flow = _build_flow(size_distrib, flow_params, name, plot=True)
+    resusp_model = _build_model(config['physics']['resuspension_model'], size_distrib, adh_distrib, name, plot=True)
 
     # Build a simulation and run it
     logger.info('Running simulation...')
-    sim = Simulation(size_distrib, adh_distrib, flow)
-    res = sim.run(config['physics']['resuspension_model'], config['simulation']['vectorized'])
+    sim = Simulation(size_distrib, adh_distrib, flow, resusp_model)
+    res = sim.run(config['simulation']['vectorized'])
     res.name = config['info']['short_name']
     logger.info('Done.')
 
@@ -123,6 +133,7 @@ def fraction_velocity_curve(config_file: str) -> None:
 
     # Build the distributions
     size_distrib, adh_distrib = _build_distribs(size_params, adh_params, plot=False)
+    resusp_model = _build_model(config['physics']['resuspension_model'], size_distrib, adh_distrib, plot=False)
 
     # Generate a range of velocities to build the validation fraction-velocity curve
     velocities = np.logspace(np.log10(0.05), np.log10(10), 60)
@@ -136,8 +147,8 @@ def fraction_velocity_curve(config_file: str) -> None:
 
         # Run the simulation
         logger.info(f'Running simulation {i+1}/{velocities.shape[0]}...')
-        sim = Simulation(size_distrib, adh_distrib, flow)
-        res = sim.run(config['physics']['resuspension_model'], config['simulation']['vectorized'])
+        sim = Simulation(size_distrib, adh_distrib, flow, resusp_model)
+        res = sim.run(config['simulation']['vectorized'])
         logger.info('Done.')
 
         # Store the final fraction

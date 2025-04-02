@@ -16,13 +16,11 @@ class ResuspensionModel:
     def __init__(self,
                  size_distrib: SizeDistribution,
                  adh_distrib: AdhesionDistribution,
-                 flow: Flow,
                  ) -> None:
         self.size_distrib = size_distrib
         self.adh_distrib = adh_distrib
-        self.flow = flow
 
-    def rate(self, t: int) -> NDArray[np.floating]:
+    def rate(self, flow: Flow, t: int = None,) -> NDArray[np.floating]:
         pass
 
     def rate_vectorized(self,) -> NDArray[np.floating]:
@@ -44,18 +42,18 @@ class RocknRollModel(ResuspensionModel):
 
         return rate
 
-    def rate(self, t: int = None,):
+    def rate(self, flow: Flow, t: int = None,):
         if t is None: # Sequential case
-            fadh = np.tile(self.adh_distrib.fadh, (self.flow.nsteps, 1, 1))
-            faero = np.tile(self.flow.faero, (self.adh_distrib.nbins, 1, 1)).transpose(1, 2, 0)
-            fluct_var = np.tile(self.flow.fluct_var, (self.adh_distrib.nbins, 1, 1)).transpose(1, 2, 0)
-            burst = np.tile(self.flow.burst[:, np.newaxis, np.newaxis],
+            fadh = np.tile(self.adh_distrib.fadh, (flow.nsteps, 1, 1))
+            faero = np.tile(flow.faero, (self.adh_distrib.nbins, 1, 1)).transpose(1, 2, 0)
+            fluct_var = np.tile(flow.fluct_var, (self.adh_distrib.nbins, 1, 1)).transpose(1, 2, 0)
+            burst = np.tile(flow.burst[:, np.newaxis, np.newaxis],
                                   (1, self.size_distrib.nbins, self.adh_distrib.nbins))
         else: # Vectorized case
             fadh = self.adh_distrib.fadh
-            faero = np.tile(self.flow.faero[t, :].reshape(-1, 1), (1, self.adh_distrib.nbins))
-            fluct_var = np.tile(self.flow.fluct_var[t, :].reshape(-1, 1), (1, self.adh_distrib.nbins))
-            burst = self.flow.burst[t] * np.ones([self.size_distrib.nbins, self.adh_distrib.nbins])
+            faero = np.tile(flow.faero[t, :].reshape(-1, 1), (1, self.adh_distrib.nbins))
+            fluct_var = np.tile(flow.fluct_var[t, :].reshape(-1, 1), (1, self.adh_distrib.nbins))
+            burst = flow.burst[t] * np.ones([self.size_distrib.nbins, self.adh_distrib.nbins])
 
         # Compute the aerodynamic fluctuation at detachment, and the variance of force fluctations
         fluct = fadh - faero
