@@ -61,6 +61,14 @@ class RocknRollModel(ResuspensionModel):
         return self.compute_rate(burst, fluct, fluct_var)
 
 
+class StaticMomentBalance(RocknRollModel):
+    @staticmethod
+    def compute_rate(burst: NDArray[np.floating],
+                     fluct: NDArray[np.floating],
+                     fluct_var: NDArray[np.floating]) -> NDArray[np.floating]:
+        return np.where(fluct > 0, 0.0, 0.5*burst/np.pi)
+
+
 class NonGaussianRocknRollModel(RocknRollModel):
     @staticmethod
     def compute_rate(burst: NDArray[np.floating],

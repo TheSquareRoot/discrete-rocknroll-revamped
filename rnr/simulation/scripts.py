@@ -8,7 +8,7 @@ from rnr.utils.parameters import check_config, load_config
 from rnr.core.aeromodel import BaseAeroModel
 from rnr.core.distribution import SizeDistributionBuilder, AdhesionDistributionBuilder
 from rnr.core.flow import FlowBuilder
-from rnr.core.model import RocknRollModel, NonGaussianRocknRollModel
+from rnr.core.model import RocknRollModel, NonGaussianRocknRollModel, StaticMomentBalance
 from rnr.simulation.simulation import Simulation
 from rnr.postproc.plotting import (plot_adhesion_distribution,
                                    plot_size_distribution,
@@ -64,6 +64,8 @@ def _build_model(model, size_distrib, adh_distrib,):
     # Chose which resuspension model to use
     if model == 'RnR':
         return RocknRollModel(size_distrib, adh_distrib)
+    elif model == 'Static':
+        return StaticMomentBalance(size_distrib, adh_distrib)
     elif model == 'NG_RnR':
         return NonGaussianRocknRollModel(size_distrib, adh_distrib)
     else:
