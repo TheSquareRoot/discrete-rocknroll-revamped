@@ -297,7 +297,25 @@ def plot_fraction_velocity_curve(res: FractionVelocityResults, plot_exp=False, p
 
     # Load Reeks and Hall data
     if plot_exp:
+        # Load data
         exp_data = read_exp_data()
+
+        # Extract a single experimental run for RMSE comparison
+        velocities_exp = [ exp_data[10][i][0] for i in [9, 10, 15] ]
+        fractions_exp  = [ exp_data[10][i][1] for i in [9, 10, 15] ]
+
+        # Interpolate simulation results at experimental velocities
+        fractions_sim_interp = [ np.interp(exp, res.velocities, res.fraction) for exp in velocities_exp ]
+
+        # Compute RMSE
+        rmse = [ np.sqrt(np.mean((fractions_sim_interp[i] - fractions_exp[i]) ** 2)) for i in range(3) ]
+        print("------ RMSE ------")
+        print(f"Exp  9: {rmse[0]:.4f}")
+        print(f"Exp 10: {rmse[1]:.4f}")
+        print(f"Exp 15: {rmse[2]:.4f}")
+        print(f"TOTAL: {np.sqrt((rmse[0]**2 + rmse[1]**2 + rmse[2]**2)/3):.4f}")
+
+        # Plot data
         ax.scatter(exp_data[10][9][0], exp_data[10][9][1], color='blue', marker='^', facecolors='none',
                    label='Exp. run 9')
         ax.scatter(exp_data[10][10][0], exp_data[10][10][1], color='black', marker='s', facecolors='none',
