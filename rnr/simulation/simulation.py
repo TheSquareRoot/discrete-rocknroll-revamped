@@ -30,8 +30,6 @@ class Simulation:
         counts = np.zeros([self.flow.nsteps, self.size_distrib.nbins, self.adh_distrib.nbins])
         counts[0,:,:] = self.size_distrib.weights[:, None] * self.adh_distrib.weights
 
-        dt = self.flow.time[1] - self.flow.time[0]
-
         logger.info('Entering time loop...')
 
         # Create the progress bar
@@ -46,6 +44,7 @@ class Simulation:
                 rate = self.resusp_model.rate(self.flow)
 
                 for t in range(self.flow.nsteps-1):
+                    dt = self.flow.time[t + 1] - self.flow.time[t]
                     counts[t+1,:,:] = np.maximum(counts[t,:,:] * (1 - rate[t,:,:] * dt), 0)
 
                     progress.advance(sim_task)
@@ -54,6 +53,7 @@ class Simulation:
             else:
                 logger.debug('Sequential simulation chosen.')
                 for t in range(self.flow.nsteps-1):
+                    dt = self.flow.time[t + 1] - self.flow.time[t]
                     rate = self.resusp_model.rate(self.flow, t)
                     counts[t+1,:,:] = np.maximum(counts[t,:,:] * (1 - rate * dt), 0)
 
