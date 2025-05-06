@@ -1,6 +1,6 @@
 [info]
 full_name = 'd10_nospread_u06_acc_JKR'
-short_name = 'D10'
+short_name = 'frms=0.0'
 
 [adhdistrib]
 nbins = 5000
@@ -20,7 +20,7 @@ weights = [ 1.0, ]
 
 [simulation]
 duration = 10.0
-dt = 5e-4
+dt = 1e-4
 
 target_vel = 0.5
 acc_time = 0.0
