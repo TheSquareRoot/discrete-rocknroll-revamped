@@ -2,6 +2,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 
+from contourpy.array import concat_offsets_or_none
+
 from rnr.utils.config import setup_logging
 from rnr.utils.parameters import check_config, load_config
 
@@ -16,6 +18,7 @@ from rnr.postproc.plotting import (plot_adhesion_distribution,
                                    plot_resuspended_fraction,
                                    plot_instant_rate,
                                    plot_fraction_velocity_curve,
+                                   plot_fraction_velocity_difference,
                                    plot_fraction_derivative,
                                    plot_resuspension_rate,
                                    )
@@ -123,13 +126,18 @@ def multiple_runs(config_dir: str,) -> None:
     plot_resuspended_fraction(results, name='multi',)
     plot_instant_rate(results, name='multi',)
 
-def fraction_velocity_curve(config_file: str) -> None:
+def fraction_velocity_curve(config_file: str, plot: bool = True) -> FractionVelocityResults:
     # Load utils file
     config = load_config(f"configs/{config_file}.toml")
 
     # Check the values from the utils file
     logger.info('Checking parameters...')
     check_config(config)
+
+    # The number of timesteps does not matter since we assume constant velocity
+    config['simulation']['duration'] = 1.0
+    config['simulation']['dt'] = 0.5
+    config['simulation']['vectorized'] = True
 
     # Compose the argument dicts for the builders
     size_params = config['sizedistrib']
@@ -163,7 +171,26 @@ def fraction_velocity_curve(config_file: str) -> None:
     res.name = config['info']['short_name']
 
     # Plot the curve
-    plot_fraction_velocity_curve(res, plot_exp=(config_file == 'reeks'))
-    plot_fraction_derivative(res,)
-    print(f'Critical threshold velocity (50%): {res.threshold_velocity(0.5):.2f}m/s')
-    print(f'Resuspension range: {res.resuspension_range:.2f}m/s')
+    if plot:
+        plot_fraction_velocity_curve([res], plot_exp=(config_file == 'reeks'))
+        #plot_fraction_derivative(res,)
+        print(f'Critical threshold velocity (50%): {res.threshold_velocity(0.5):.2f}m/s')
+        print(f'Resuspension range: {res.resuspension_range:.2f}m/s')
+
+    return res
+
+def multiple_fraction_velocity_curves(config_dir: str) -> None:
+    # Get the config files from the directory
+    dir_path = f"configs/{config_dir}/"
+    config_files = [f for f in os.listdir(dir_path) if f.endswith(".toml")]
+
+    # Run the simulations
+    results = []
+
+    for config_file in config_files:
+        path = f"{config_dir}/{config_file.split('.')[0]}"
+        results.append(fraction_velocity_curve(path, plot=False))
+
+    # Plot the results of all simulations on the same graph
+    plot_fraction_velocity_curve(results, plot_exp=False, plot_stats=False)
+    plot_fraction_velocity_difference(results)

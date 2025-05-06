@@ -274,7 +274,7 @@ def plot_validity_domain(modes: list[float], target_vel: float, viscosity: float
     fig.savefig('figs/validity_domain.png', dpi=300)
     plt.close(fig)
 
-def plot_fraction_velocity_curve(res: FractionVelocityResults, plot_exp=False, plot_stats=True,) -> None:
+def plot_fraction_velocity_curve(results: list[FractionVelocityResults], plot_exp=False, plot_stats=True,) -> None:
     """
     Basic plot of the fraction-velocity curve.
 
@@ -285,11 +285,13 @@ def plot_fraction_velocity_curve(res: FractionVelocityResults, plot_exp=False, p
     # Plot
     fig, ax = plt.subplots(figsize=(6, 4))
 
-    ax.plot(res.velocities, res.fraction, color='r', zorder=10)
+    for res in results:
+        ax.plot(res.velocities, res.fraction, label=res.name, zorder=10)
 
     # Plot analysis quantities
-    if plot_stats:
-        vlow, vhigh = res.threshold_velocity(0.95), res.threshold_velocity(0.05)
+    # Only if there is one set of results for now
+    if plot_stats and (len(results) == 1):
+        vlow, vhigh = results[0].threshold_velocity(0.95), results[0].threshold_velocity(0.05)
 
         ax.axvline(vhigh, color='k', linestyle='--', linewidth=0.75, zorder=5)
         ax.axvline(vlow, color='k', linestyle='--', linewidth=0.75, zorder=5)
@@ -305,7 +307,7 @@ def plot_fraction_velocity_curve(res: FractionVelocityResults, plot_exp=False, p
         fractions_exp  = [ exp_data[10][i][1] for i in [9, 10, 15] ]
 
         # Interpolate simulation results at experimental velocities
-        fractions_sim_interp = [ np.interp(exp, res.velocities, res.fraction) for exp in velocities_exp ]
+        fractions_sim_interp = [ np.interp(exp, results[0].velocities, results[0].fraction) for exp in velocities_exp ]
 
         # Compute RMSE
         rmse = [ np.sqrt(np.mean((fractions_sim_interp[i] - fractions_exp[i]) ** 2)) for i in range(3) ]
@@ -324,11 +326,13 @@ def plot_fraction_velocity_curve(res: FractionVelocityResults, plot_exp=False, p
                    label='Exp. run 15')
 
     ax.set_xscale('log')
-    ax.set_xlim(res.velocities[0], res.velocities[-1])
+    ax.set_xlim(results[0].velocities[0], results[0].velocities[-1])
     ax.set_ylim(0, 1.1)
 
     ax.set_xlabel('Friction velocity [m/s]')
     ax.set_ylabel('Remaining fraction after 1s')
+
+    ax.legend()
 
     ax.grid(axis='x', which='both', zorder=0)
     ax.grid(axis='y', which='major', zorder=0)
@@ -337,6 +341,35 @@ def plot_fraction_velocity_curve(res: FractionVelocityResults, plot_exp=False, p
 
     fig.savefig('figs/validation.png', dpi=300)
     plt.close(fig)
+
+
+def plot_fraction_velocity_difference(results: list[FractionVelocityResults]) -> None:
+    # Compute the difference between the each curve and the baseline (by default the last result)
+    diffs = [np.abs(res.fraction - results[-1].fraction) for res in results]
+
+    # Create the figure and axis
+    fig, ax = plt.subplots(figsize=(6, 4))
+
+    for (diff, res) in zip(diffs[:-1], results[:-1]):
+        ax.plot(results[0].velocities, diff, label=res.name, zorder=10)
+
+    ax.set_xscale('log')
+    ax.set_xlim(results[0].velocities[0], results[0].velocities[-1])
+    ax.set_ylim(0, 0.2)
+
+    ax.set_xlabel('Friction velocity [m/s]')
+    ax.set_ylabel('Remaining fraction after 1s')
+
+    ax.legend()
+
+    ax.grid(axis='x', which='both', zorder=0)
+    ax.grid(axis='y', which='major', zorder=0)
+
+    fig.tight_layout()
+
+    fig.savefig('figs/diff.png', dpi=300)
+    plt.close(fig)
+
 
 def plot_fraction_derivative(res: FractionVelocityResults,) -> None:
     # Plot
