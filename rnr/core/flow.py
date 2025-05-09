@@ -58,6 +58,7 @@ class FlowBuilder:
                  density: float,
                  viscosity: float,
                  frms: float,
+                 perturbation: bool = False,
                  **kwargs,
                  ) -> None:
 
@@ -71,6 +72,7 @@ class FlowBuilder:
         self.target_vel = target_vel
         self.acc_time = acc_time
         self.transition = transition
+        self.perturbation = perturbation
 
         # Physical quantities
         self.density = density
@@ -92,6 +94,20 @@ class FlowBuilder:
                 velocity = np.clip((self.target_vel / self.acc_time) * time, 0, self.target_vel)
         else:
             velocity = np.ones_like(time) * self.target_vel
+
+        if self.perturbation:
+            # Generate gaussian white noise
+            # noise = np.random.normal(0.0, 1.0, size=len(time))
+            # current_rmse = np.sqrt(np.mean(noise ** 2))
+            # scaled_noise = noise * (0.5 * self.frms * np.max(velocity) / current_rmse)
+            # velocity += scaled_noise
+            rng = np.random.default_rng()
+
+            local_std = 0.5 * self.frms * velocity
+
+            noise = rng.normal(loc=0.0, scale=local_std)
+
+            velocity += noise
 
         # Compute aerodynamic quantities
         lift = self.aeromodel.lift(velocity, self.size_distrib.radii_meter)
