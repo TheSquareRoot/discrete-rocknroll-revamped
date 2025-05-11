@@ -114,7 +114,7 @@ class FlowBuilder:
         drag = self.aeromodel.drag(velocity, self.size_distrib.radii_meter)
         faero = 0.5 * lift + 100 * drag
         fluct_var = (self.frms * faero) ** 2
-        burst = self.aeromodel.burst(velocity, )
+        burst = 0.5 * self.aeromodel.burst(velocity) / np.pi
 
         # Instantiate the flow class
         flow = Flow(velocity,

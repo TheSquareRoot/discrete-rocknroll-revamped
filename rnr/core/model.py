@@ -34,11 +34,11 @@ class RocknRollModel(ResuspensionModel):
                      fluct_var: NDArray[np.floating]) -> NDArray[np.floating]:
 
         # Compute the resuspension rate
-        rate = (0.5*burst/np.pi) * np.exp(- (fluct ** 2) / (2 * fluct_var)) / (
+        rate = burst * np.exp(- (fluct ** 2) / (2 * fluct_var)) / (
                     0.5 * (1 + erf(fluct / np.sqrt(2 * fluct_var))))
 
         # Makes sure the rate is never superior to the burst frequency
-        rate = np.minimum(rate, (0.5*burst/np.pi))
+        rate = np.minimum(rate, burst)
 
         return rate
 
