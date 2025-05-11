@@ -135,9 +135,14 @@ def fraction_velocity_curve(config_file: str, plot: bool = True) -> FractionVelo
     check_config(config)
 
     # The number of timesteps does not matter since we assume constant velocity
-    config['simulation']['duration'] = 1.0
-    config['simulation']['dt'] = 0.5
-    config['simulation']['vectorized'] = True
+    if config['simulation']['perturbation']:
+        config['simulation']['duration'] = 10.0
+        config['simulation']['dt'] = 1e-3
+        config['simulation']['vectorized'] = True
+    else:
+        config['simulation']['duration'] = 1.0
+        config['simulation']['dt'] = 0.5
+        config['simulation']['vectorized'] = True
 
     # Compose the argument dicts for the builders
     size_params = config['sizedistrib']
