@@ -1,6 +1,6 @@
 [info]
 full_name = 'd10_nospread_u06_acc_JKR'
-short_name = 'frms=0.0'
+short_name = 'Static'
 
 [adhdistrib]
 nbins = 5000
@@ -25,6 +25,7 @@ dt = 1e-4
 target_vel = 0.5
 acc_time = 0.0
 transition = 'instant'
+perturbation = false
 
 vectorized = false
 
@@ -44,4 +45,4 @@ lift_power = 2.31
 
 burst_coeff = 0.0413
 
-frms = 0.366
+frms = 0.3
