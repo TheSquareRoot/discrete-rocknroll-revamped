@@ -1,62 +1,73 @@
 import matplotlib.pyplot as plt
 import numpy as np
-
 from numpy.typing import NDArray
 
-from rnr.utils.config import setup_logging
 from rnr.core.distribution import AdhesionDistribution, SizeDistribution
 from rnr.core.flow import Flow
-
+from rnr.utils.config import setup_logging
 
 # Configure module logger from utils file
-logger = setup_logging(__name__, 'logs/log.log')
+logger = setup_logging(__name__, "logs/log.log")
 
 
 class Results:
-    def __init__(self,
-                 adh_distrib: AdhesionDistribution,
-                 size_distrib: SizeDistribution,) -> None:
-        self.name = 'NA'
+    def __init__(
+        self,
+        adh_distrib: AdhesionDistribution,
+        size_distrib: SizeDistribution,
+    ) -> None:
+        self.name = "NA"
         self.adh_distrib = adh_distrib
         self.size_distrib = size_distrib
 
 
 class TemporalResults(Results):
-    def __init__(self,
-                 adh_distrib: AdhesionDistribution,
-                 size_distrib: SizeDistribution,
-                 flow: Flow,
-                 counts: NDArray[np.floating],
-                 time: NDArray[np.floating],
-                 ) -> None:
+    def __init__(
+        self,
+        adh_distrib: AdhesionDistribution,
+        size_distrib: SizeDistribution,
+        flow: Flow,
+        counts: NDArray[np.floating],
+        time: NDArray[np.floating],
+    ) -> None:
         super().__init__(adh_distrib, size_distrib)
         self.flow = flow
         self.counts = counts
         self.time = time
 
     @property
-    def remaining_fraction(self,) -> NDArray[np.floating]:
-        return np.sum(self.counts, axis=(1,2))
+    def remaining_fraction(
+        self,
+    ) -> NDArray[np.floating]:
+        return np.sum(self.counts, axis=(1, 2))
 
     @property
-    def resuspended_fraction(self,) -> NDArray[np.floating]:
-        return 1 - np.sum(self.counts, axis=(1,2))
+    def resuspended_fraction(
+        self,
+    ) -> NDArray[np.floating]:
+        return 1 - np.sum(self.counts, axis=(1, 2))
 
     @property
     def instant_rate(self) -> NDArray[np.floating]:
         return self.remaining_fraction[:-1] - self.remaining_fraction[1:]
 
     @property
-    def final_rem_frac(self,) -> float:
+    def final_rem_frac(
+        self,
+    ) -> float:
         return float(self.remaining_fraction[-1])
 
     @property
-    def final_resus_frac(self,) -> float:
+    def final_resus_frac(
+        self,
+    ) -> float:
         return float(self.resuspended_fraction[-1])
 
     def time_to_fraction(self, fraction: float) -> float:
         # Normalize resuspended fraction by the final value
-        normalized_resuspended = self.resuspended_fraction / self.resuspended_fraction[-1]
+        normalized_resuspended = (
+            self.resuspended_fraction / self.resuspended_fraction[-1]
+        )
 
         # Find the index where the fraction first exceeds the target percentage
         idx = np.searchsorted(normalized_resuspended, fraction)
@@ -74,24 +85,30 @@ class TemporalResults(Results):
 
         return t_target
 
-    def plot_distribution(self, t: int = 0,) -> None:
+    def plot_distribution(
+        self,
+        t: int = 0,
+    ) -> None:
         fig, ax = plt.subplots(figsize=(6, 4))
 
         # plt.matshow(self.counts[t,:,:], norm=matplotlib.colors.LogNorm(vmin=self.counts[-1,:,:].min(), vmax=self.counts[0,:,:].max()))
-        cax = ax.matshow(self.counts[t,:,:], cmap='magma', aspect='auto')
+        cax = ax.matshow(self.counts[t, :, :], cmap="magma", aspect="auto")
 
-        fig.colorbar(cax, ax=ax, label='Probability')
+        fig.colorbar(cax, ax=ax, label="Probability")
 
-        ax.set_xlabel('Adhesion force')
-        ax.set_ylabel('Size')
+        ax.set_xlabel("Adhesion force")
+        ax.set_ylabel("Size")
 
         fig.tight_layout()
 
-        fig.savefig(f'figs/distribution_tstep={t}.png', dpi=300)
+        fig.savefig(f"figs/distribution_tstep={t}.png", dpi=300)
         plt.close(fig)
 
-    def plot_remaining_fraction(self, scale: str='log',) -> None:
-        fig, ax = plt.subplots(figsize=(6,4))
+    def plot_remaining_fraction(
+        self,
+        scale: str = "log",
+    ) -> None:
+        fig, ax = plt.subplots(figsize=(6, 4))
 
         ax.plot(self.time, self.remaining_fraction)
 
@@ -99,23 +116,26 @@ class TemporalResults(Results):
 
         fig.tight_layout()
 
-        fig.savefig(f'figs/remaining_fraction.png', dpi=300)
+        fig.savefig("figs/remaining_fraction.png", dpi=300)
         plt.close(fig)
 
 
 class FractionVelocityResults(Results):
-    def __init__(self,
-                 adh_distrib: AdhesionDistribution,
-                 size_distrib: SizeDistribution,
-                 fraction: NDArray[np.floating],
-                 velocities: NDArray[np.floating],
-                 ) -> None:
+    def __init__(
+        self,
+        adh_distrib: AdhesionDistribution,
+        size_distrib: SizeDistribution,
+        fraction: NDArray[np.floating],
+        velocities: NDArray[np.floating],
+    ) -> None:
         super().__init__(adh_distrib, size_distrib)
         self.fraction = fraction
         self.velocities = velocities
 
     @property
-    def resuspension_range(self,) -> float:
+    def resuspension_range(
+        self,
+    ) -> float:
         """
         Computes the range of velocity between 5% and 95% of particles resuspended.
         Expresses the sensitivity to velocity bursts.
@@ -126,7 +146,9 @@ class FractionVelocityResults(Results):
         return high_thresh - low_thresh
 
     @property
-    def fraction_derivative(self,):
+    def fraction_derivative(
+        self,
+    ) -> NDArray:
         """
         Computes the velocity derivative of the fraction using finite differences.
 
@@ -142,13 +164,19 @@ class FractionVelocityResults(Results):
 
         # Compute derivative using central differences for the interior points
         df_dv = np.zeros_like(self.fraction)
-        df_dv[1:-1] = (self.fraction[2:] - self.fraction[:-2]) / (self.velocities[2:] - self.velocities[:-2])
+        df_dv[1:-1] = (self.fraction[2:] - self.fraction[:-2]) / (
+            self.velocities[2:] - self.velocities[:-2]
+        )
 
         # Use forward difference for the first point
-        df_dv[0] = (self.fraction[1] - self.fraction[0]) / (self.velocities[1] - self.velocities[0])
+        df_dv[0] = (self.fraction[1] - self.fraction[0]) / (
+            self.velocities[1] - self.velocities[0]
+        )
 
         # Use backward difference for the last point
-        df_dv[-1] = (self.fraction[-1] - self.fraction[-2]) / (self.velocities[-1] - self.velocities[-2])
+        df_dv[-1] = (self.fraction[-1] - self.fraction[-2]) / (
+            self.velocities[-1] - self.velocities[-2]
+        )
 
         return np.abs(df_dv)
 
