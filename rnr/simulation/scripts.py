@@ -11,8 +11,8 @@ from rnr.core.distribution import (
 )
 from rnr.core.flow import Flow, FlowBuilder
 from rnr.core.model import (
-    Model,
     NonGaussianRocknRollModel,
+    ResuspensionModel,
     RocknRollModel,
     StaticMomentBalance,
 )
@@ -86,7 +86,7 @@ def _build_model(
     model: str,
     size_distrib: SizeDistribution,
     adh_distrib: AdhesionDistribution,
-) -> Model:
+) -> ResuspensionModel:
     # Chose which resuspension model to use
     if model == "RnR":
         return RocknRollModel(size_distrib, adh_distrib)

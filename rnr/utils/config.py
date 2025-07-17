@@ -47,7 +47,7 @@ def setup_logging(name: str, log_file: str) -> logging.Logger:
     return logger
 
 
-def setup_parsing() -> argparse.Parser:
+def setup_parsing() -> argparse.ArgumentParser:
     # Define parser
     parser = argparse.ArgumentParser()
 
