@@ -1,15 +1,15 @@
-from rnr.utils.config import setup_logging, setup_parsing
 from rnr.simulation.scripts import (
-    single_run,
-    multiple_runs,
     fraction_velocity_curve,
     multiple_fraction_velocity_curves,
+    multiple_runs,
+    single_run,
 )
+from rnr.utils.config import setup_logging, setup_parsing
 
 logger = setup_logging(__name__, "logs/log.log")
 
 
-def main():
+def main() -> None:
     # Create parser
     parser = setup_parsing()
 
