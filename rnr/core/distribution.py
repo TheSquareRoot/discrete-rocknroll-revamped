@@ -66,7 +66,7 @@ class SizeDistributionBuilder:
         modes: list[float],
         spreads: list[float],
         weights: list[float],
-        **kwargs,
+        **kwargs: dict,
     ) -> None:
         self.nmodes = nmodes
         self.width = width
@@ -198,11 +198,7 @@ class AdhesionDistribution:
         return self.fadh_norm * self.norm_factors
 
     # Some statistical quantities --------------------------------------------------------------------------------------
-    def median(
-        self,
-        i: int,
-        norm: bool = True,
-    ) -> float:
+    def median(self, i: int, *, norm: bool = True) -> float:
         """
         Computes the median adhesion force for a given size bin.
 
@@ -217,7 +213,7 @@ class AdhesionDistribution:
 
         return median(self.fadh[i], self.weights[i])
 
-    def mean(self, i: int, norm: bool = True) -> float:
+    def mean(self, i: int, *, norm: bool = True) -> float:
         """
         Computes the median adhesion force for a given size bin.
 
@@ -231,7 +227,7 @@ class AdhesionDistribution:
             return float(np.average(self.fadh_norm[i], weights=self.weights[i]))
         return float(np.average(self.fadh[i], weights=self.weights[i]))
 
-    def geo_spread(self, i: int, norm: bool = True) -> float:
+    def geo_spread(self, i: int, *, norm: bool = True) -> float:
         mean, med = self.mean(i, norm=norm), self.median(i, norm=norm)
 
         return np.exp(np.sqrt(2 * np.log(mean / med)))
@@ -250,7 +246,7 @@ class AdhesionDistributionBuilder:
         surface_energy: float | None = None,
         asperity_radius: float | None = None,
         peaktopeak: float | None = None,
-        **kwargs,
+        **kwargs: dict,
     ) -> None:
         self.size_distrib = size_distrib
         self.nbins = nbins
@@ -273,7 +269,7 @@ class AdhesionDistributionBuilder:
             return biasi_params(
                 radii,
             )
-        elif self.dist_params == "custom":
+        if self.dist_params == "custom":
             # Distinguish between the spread and no spread case.
             # If there is a radius spread, it is unlikely the user will provide medians and spreads for each size bin
             # So instead, values have to be derived from the user inputs.
@@ -284,16 +280,16 @@ class AdhesionDistributionBuilder:
                     np.ones(self.size_distrib.nbins) * self.spreads[0],
                 )
             # If there as many sets of params are modes, one set is assigned to each mode
-            elif len(self.medians) == self.size_distrib.nmodes:
+            if len(self.medians) == self.size_distrib.nmodes:
                 # TODO: implement what happens when a set of parameters are provided for each mode
-                pass
-            # Otherwise wtf are they doing anyway
-            else:
-                raise ValueError(
-                    f"Inccorrect number of parameters provided: {len(self.medians)}",
+                raise NotImplementedError(
+                    "Custom per-mode distribution parameters are not yet implemented.",
                 )
-        else:
-            raise ValueError(f"Unknown distribution parameter {self.dist_params}")
+            # Otherwise wtf are they doing anyway
+            raise ValueError(
+                f"Incorrect number of parameters provided: {len(self.medians)}",
+            )
+        raise ValueError(f"Unknown distribution parameter {self.dist_params}")
 
     def _compute_norm_factor(
         self,

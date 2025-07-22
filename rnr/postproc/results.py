@@ -116,7 +116,7 @@ class TemporalResults(Results):
 
         fig.tight_layout()
 
-        fig.savefig(f"figs/remaining_fraction.png", dpi=300)
+        fig.savefig("figs/remaining_fraction.png", dpi=300)
         plt.close(fig)
 
 
@@ -148,7 +148,7 @@ class FractionVelocityResults(Results):
     @property
     def fraction_derivative(
         self,
-    ):
+    ) -> NDArray:
         """
         Computes the velocity derivative of the fraction using finite differences.
 

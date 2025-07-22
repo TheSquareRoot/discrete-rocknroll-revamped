@@ -109,17 +109,17 @@ class NonGaussianRocknRollModel(RocknRollModel):
         fluct_var: NDArray[np.floating],
     ) -> NDArray[np.floating]:
         # Non-Gaussian distrib parameters
-        A1 = 1.812562
-        A2 = 1.463790
-        Bf = 0.343658
+        a1 = 1.812562
+        a2 = 1.463790
+        bf = 0.343658
 
         # Compute the resuspension rate
         zdh = fluct / np.sqrt(fluct_var)
         rate = (
-            (Bf * burst)
-            * ((zdh + A1) / (A2**2))
-            * np.exp(-0.5 * ((zdh + A1) / A2) ** 2)
-            / (1 - np.exp(-0.5 * ((zdh + A1) / A2) ** 2))
+            (bf * burst)
+            * ((zdh + a1) / (a2**2))
+            * np.exp(-0.5 * ((zdh + a1) / a2) ** 2)
+            / (1 - np.exp(-0.5 * ((zdh + a1) / a2) ** 2))
         )
 
         # Makes sure the rate is never superior to the burst frequency

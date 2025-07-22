@@ -1,8 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib.axes import Axes
-from matplotlib.figure import Figure
-from numpy.typing import NDArray
+from matplotlib import ticker
 
 from rnr.core.distribution import AdhesionDistribution, SizeDistribution
 from rnr.core.flow import Flow
@@ -321,8 +319,9 @@ def plot_validity_domain(
 
 def plot_fraction_velocity_curve(
     results: list[FractionVelocityResults],
-    plot_exp=False,
-    plot_stats=True,
+    *,
+    plot_exp: bool = False,
+    plot_stats: bool = True,
 ) -> None:
     """
     Basic plot of the fraction-velocity curve.
@@ -354,7 +353,12 @@ def plot_fraction_velocity_curve(
         ax.axvline(vhigh, color="k", linestyle="--", linewidth=0.75, zorder=5)
         ax.axvline(vlow, color="k", linestyle="--", linewidth=0.75, zorder=5)
         ax.fill_betweenx(
-            y=[0, 1.1], x1=vlow, x2=vhigh, color="grey", alpha=0.3, zorder=3
+            y=[0, 1.1],
+            x1=vlow,
+            x2=vhigh,
+            color="grey",
+            alpha=0.3,
+            zorder=3,
         )
 
     # Load Reeks and Hall data
@@ -437,7 +441,7 @@ def plot_fraction_velocity_difference(results: list[FractionVelocityResults]) ->
     # Create the figure and axis
     fig, ax = plt.subplots(figsize=(6, 4))
 
-    for diff, res in zip(diffs[:-1], results[:-1]):
+    for diff, res in zip(diffs[:-1], results[:-1], strict=True):
         ax.plot(results[0].velocities, diff, label=res.name, zorder=10)
 
     ax.set_xscale("log")
@@ -492,14 +496,52 @@ def plot_resuspension_rate(
     ax1 = fig.add_subplot(1, 1, 1)
     ax2 = ax1.twinx()
 
-    ax1.plot(model.adh_distrib.fadh_norm[0, :], rate[0, :] / flow.burst[-1], color="k")
-    ax2.plot(
-        model.adh_distrib.fadh_norm[0, :], model.adh_distrib.weights[0, :], color="r"
+    # Force ax1 above ax2
+    ax1.set_zorder(ax2.get_zorder() + 1)
+    ax1.patch.set_visible(False)  # Hide ax1 background so bars from ax2 are visible
+
+    ax1.plot(
+        model.adh_distrib.fadh[0, :] / 1e-9,
+        rate[0, :] / flow.burst[-1],
+        color="k",
+        label="Resuspension rate",
+        zorder=10,
+    )
+    ax2.bar(
+        model.adh_distrib.fadh[0, :] / 1e-9,
+        model.adh_distrib.weights[0, :],
+        width=2.15,  # Adjust width as needed for visual clarity
+        color="r",
+        alpha=0.5,
+        edgecolor="r",
+        label="Adhesion distribution",
+        zorder=5,
     )
 
-    ax1.set_xlim(left=0, right=0.03)
-    ax1.set_ylim(bottom=0, top=0.2)
+    # Axis limits
+    ax1.set_xlim(left=0, right=1e2)
+    ax1.set_ylim(bottom=0, top=1.05)
     ax2.set_ylim(bottom=0)
+
+    # Labels
+    ax1.set_xlabel(r"Adhesion force $f_a$ [nN]")
+    ax1.set_ylabel(r"$\mathcal{T}_r / n_{\theta}$")
+    ax2.set_ylabel(r"frequency")
+
+    # Ticks settings
+    ax1.xaxis.set_major_locator(ticker.MultipleLocator(20))
+    ax1.xaxis.set_minor_locator(ticker.MultipleLocator(5))
+
+    ax1.yaxis.set_major_locator(ticker.MultipleLocator(0.2))
+    ax1.yaxis.set_minor_locator(ticker.MultipleLocator(0.1))
+
+    ax2.yaxis.set_major_locator(ticker.MultipleLocator(0.01))
+    ax2.yaxis.set_minor_locator(ticker.MultipleLocator(0.0025))
+
+    # Legend
+    lines_1, labels_1 = ax1.get_legend_handles_labels()
+    lines_2, labels_2 = ax2.get_legend_handles_labels()
+    ax1.legend(lines_1 + lines_2, labels_1 + labels_2, loc="upper right")
 
     fig.tight_layout()
 

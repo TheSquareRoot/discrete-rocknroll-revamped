@@ -1,6 +1,6 @@
 import csv
-import os
 import re
+from pathlib import Path
 
 import numpy as np
 from numpy.typing import NDArray
@@ -16,7 +16,7 @@ def rplus(radius: float, friction_vel: float, viscosity: float) -> float:
     return radius * friction_vel / viscosity
 
 
-def biasi_params(radii) -> tuple:
+def biasi_params(radii: list) -> tuple:
     """
     Return the log-normal median and spread parameters for an arbitrary number of radii.
     Uses the fit from Biasi (2001).
@@ -56,7 +56,7 @@ def log_norm(x: float, mean: float, stdv: float) -> float:
 def normal(x: float, mean: float, stdv: float) -> float:
     """Normal PDF"""
     proba_density = np.exp(-((x - mean) ** 2) / (2 * (stdv**2))) / np.sqrt(
-        2 * np.pi * (stdv**2)
+        2 * np.pi * (stdv**2),
     )
 
     return proba_density
@@ -93,7 +93,8 @@ def read_exp_data() -> dict:
 
     data = {}
 
-    for filename in os.listdir("data/"):
+    data_dir = Path("data/")
+    for filename in data_dir.iterdir():
         match = pattern.match(filename)
         # Extract the diameter and run number
         if match:
@@ -105,7 +106,7 @@ def read_exp_data() -> dict:
                 data[diameter] = {}
 
             # Read data from file and store it
-            with open(f"data/{filename}", mode="r") as file:
+            with Path(f"data/{filename}").open("r") as file:
                 reader = csv.reader(file)
                 next(reader)  # Skip the header row
 

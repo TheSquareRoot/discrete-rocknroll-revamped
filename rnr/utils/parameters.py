@@ -1,4 +1,5 @@
 import sys
+from pathlib import Path
 
 import toml
 
@@ -13,7 +14,7 @@ logger = setup_logging(__name__, "logs/log.log")
 
 def load_config(file_path: str) -> dict:
     try:
-        with open(file_path, "r") as file:
+        with Path(file_path).open("r") as file:
             logger.info(f"Loading configuration from {file_path}")
             return toml.load(file)
     except FileNotFoundError:
@@ -24,7 +25,7 @@ def load_config(file_path: str) -> dict:
         sys.exit(1)
 
 
-def check_model_validity(config):
+def check_model_validity(config: dict) -> None:
     """
     Checks that each mode is within the allowed r+ range for the given flow conditions.
     The main thing to check is that r+ is less than 2.5, i.e. the particle is fully submerged in the
@@ -41,7 +42,7 @@ def check_model_validity(config):
             logger.warning(f"Mode {i} is outside the viscous sublayer!")
 
 
-def check_config(config):
+def check_config(config: dict) -> None:
     """
     Check the conformity of the parameters provided by the user.
     """

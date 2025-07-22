@@ -1,4 +1,4 @@
-import os
+from pathlib import Path
 
 import numpy as np
 
@@ -37,7 +37,8 @@ logger = setup_logging(__name__, "logs/log.log")
 def _build_distribs(
     size_params: dict,
     adh_params: dict,
-    name: str = None,
+    name: str | None = None,
+    *,
     plot: bool = False,
 ) -> tuple[SizeDistribution, AdhesionDistribution]:
     # Build the particle size distribution
@@ -63,7 +64,8 @@ def _build_distribs(
 def _build_flow(
     size_distrib: SizeDistribution,
     flow_params: dict,
-    name: str = None,
+    name: str | None = None,
+    *,
     plot: bool = False,
 ) -> Flow:
     # Instantiate force model
@@ -109,7 +111,7 @@ def single_run(
 
     # Create the output folder for figures
     name = config["info"]["full_name"]
-    os.makedirs(f"figs/{name}", exist_ok=True)
+    Path(f"figs/{name}").mkdir(parents=True, exist_ok=True)
 
     # Compose the argument dicts for the builders
     size_params = config["sizedistrib"]
@@ -149,8 +151,8 @@ def multiple_runs(
     config_dir: str,
 ) -> None:
     # Get the config files from the directory
-    dir_path = f"configs/{config_dir}/"
-    config_files = [f for f in os.listdir(dir_path) if f.endswith(".toml")]
+    dir_path = Path(f"configs/{config_dir}/")
+    config_files = [f for f in dir_path.iterdir() if f.endswith(".toml")]
 
     # Run the simulations
     results = []
@@ -172,6 +174,7 @@ def multiple_runs(
 
 def fraction_velocity_curve(
     config_file: str,
+    *,
     plot: bool = True,
 ) -> FractionVelocityResults:
     # Load utils file
@@ -245,8 +248,8 @@ def fraction_velocity_curve(
 
 def multiple_fraction_velocity_curves(config_dir: str) -> None:
     # Get the config files from the directory
-    dir_path = f"configs/{config_dir}/"
-    config_files = [f for f in os.listdir(dir_path) if f.endswith(".toml")]
+    dir_path = Path(f"configs/{config_dir}/")
+    config_files = [f for f in dir_path.iterdir() if f.endswith(".toml")]
 
     # Run the simulations
     results = []

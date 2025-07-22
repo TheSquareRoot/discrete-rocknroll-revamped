@@ -23,11 +23,11 @@ class Simulation:
         self.flow = flow
         self.resusp_model = resusp_model
 
-    def run(self, vectorized: bool = False) -> TemporalResults:
+    def run(self, *, vectorized: bool = False) -> TemporalResults:
         # Build population array
         logger.info("Building population array...")
         counts = np.zeros(
-            [self.flow.nsteps, self.size_distrib.nbins, self.adh_distrib.nbins]
+            [self.flow.nsteps, self.size_distrib.nbins, self.adh_distrib.nbins],
         )
         counts[0, :, :] = self.size_distrib.weights[:, None] * self.adh_distrib.weights
 
@@ -38,10 +38,11 @@ class Simulation:
 
         with progress:
             sim_task = progress.add_task(
-                "Running simulation...", total=self.flow.nsteps
+                "Running simulation...",
+                total=self.flow.nsteps,
             )
-            # In the vectorized case, the resuspension rate array is computed before the loop. It is usually faster but
-            # requires more memory
+            # In the vectorized case, the resuspension rate array is computed before the loop. It is usually
+            # faster but requires more memory
             if vectorized:
                 logger.debug("Vectorized simulation chosen.")
                 rate = self.resusp_model.rate(self.flow)
@@ -49,7 +50,8 @@ class Simulation:
                 for t in range(self.flow.nsteps - 1):
                     dt = self.flow.time[t + 1] - self.flow.time[t]
                     counts[t + 1, :, :] = np.maximum(
-                        counts[t, :, :] * (1 - rate[t, :, :] * dt), 0
+                        counts[t, :, :] * (1 - rate[t, :, :] * dt),
+                        0,
                     )
 
                     progress.advance(sim_task)
@@ -61,7 +63,8 @@ class Simulation:
                     dt = self.flow.time[t + 1] - self.flow.time[t]
                     rate = self.resusp_model.rate(self.flow, t)
                     counts[t + 1, :, :] = np.maximum(
-                        counts[t, :, :] * (1 - rate * dt), 0
+                        counts[t, :, :] * (1 - rate * dt),
+                        0,
                     )
 
                     progress.advance(sim_task)

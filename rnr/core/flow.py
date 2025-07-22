@@ -58,8 +58,8 @@ class FlowBuilder:
         density: float,
         viscosity: float,
         frms: float,
-        perturbation: bool = False,
-        **kwargs,
+        perturbation: bool,  # noqa: FBT001
+        **kwargs: dict,
     ) -> None:
         # Objects
         self.size_distrib = size_distrib
