@@ -61,18 +61,19 @@ class TestDistribution(unittest.TestCase):
             nbins=self.adh_nbins,
             fmax=30.0,
             dist_params="biasi",
-            adhesion_model="RnR",
+            adhesion_model="JKR",
             surface_energy=0.1,
-        )
+        ).generate()
+
         # Multimodal
         self.adh_distrib_multimodal = AdhesionDistributionBuilder(
             size_distrib=self.size_distrib_multimodal_cont,
             nbins=self.adh_nbins,
             fmax=30.0,
             dist_params="biasi",
-            adhesion_model="RnR",
+            adhesion_model="JKR",
             surface_energy=0.1,
-        )
+        ).generate()
 
 
 class TestSizeDistribution(TestDistribution):
@@ -80,8 +81,8 @@ class TestSizeDistribution(TestDistribution):
         """Basic tests. Mostly makes sure the arrays created are of the right shape."""
         assert self.size_distrib_unimodal_disc.radii.shape[0] == 1
         assert self.size_distrib_multimodal_disc.radii.shape[0] == 2
-        assert self.size_distrib_unimodal_cont.radii.shape[0] == self.nbins
-        assert self.size_distrib_multimodal_cont.radii.shape[0] == self.nbins
+        assert self.size_distrib_unimodal_cont.radii.shape[0] == self.size_nbins
+        assert self.size_distrib_multimodal_cont.radii.shape[0] == self.size_nbins
 
     def test_sum(self):
         """Checks that the weights of the distribution sum up to 1."""
