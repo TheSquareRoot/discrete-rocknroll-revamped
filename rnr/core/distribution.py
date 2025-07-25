@@ -58,6 +58,35 @@ class SizeDistribution:
 
 
 class SizeDistributionBuilder:
+    """
+    A builder class for generating particle size distributions based on a set of user defined parameters.
+
+    This class supports constructing both discrete and continuous multimodal particle size distributions
+    using composite normal distributions.
+
+    Attributes
+    ----------
+    nmodes : int
+        Number of particle size modes.
+    width : float
+        Span of the modes support as multiples of the standard deviation.
+    nbins : int
+        Number of bins used to discretize the radius domain.
+    modes : list of float
+        Modal radii of the size distribution.
+    spreads : list of float
+        Spread (standard deviation) of each mode. A spread of zero indicates a delta function.
+    weights : list of float
+        Relative weights of each mode. Should sum to 1 for proper normalization.
+    **kwargs : dict
+        Additional keyword arguments (currently unused, included for extensibility).
+
+    Methods
+    -------
+    generate() -> SizeDistribution
+        Generate the particle size distribution using the provided parameters.
+    """
+
     def __init__(
         self,
         nmodes: int,
@@ -91,25 +120,19 @@ class SizeDistributionBuilder:
             num=self.nbins,
         )
 
-    def _generate_no_spread(
-        self,
-    ) -> SizeDistribution:
+    def _generate_no_spread(self) -> SizeDistribution:
+        """Generate a discrete particle size distribution."""
         size_distrib = SizeDistribution(
-            np.array(self.modes),
-            np.zeros_like(self.modes),
-            np.array(self.modes),
-            np.ones_like(self.modes),
+            modes=np.array(self.modes),
+            spreads=np.zeros_like(self.modes),
+            radii=np.array(self.modes),
+            counts=np.array(self.weights),
         )
 
         return size_distrib
 
-    def _generate_with_spread(
-        self,
-    ) -> SizeDistribution:
-        """
-        Generate a particle size distribution from the parameters loaded from the utils file.
-        The result is a composite of normal distributions.
-        """
+    def _generate_with_spread(self) -> SizeDistribution:
+        """Generate a continuous particle size distribution.The result is a composite of normal distributions."""
         # TODO: integrate the normal distribution to compute the weights
 
         # Get the domain over which the size distribution will be generated
@@ -134,10 +157,10 @@ class SizeDistributionBuilder:
 
         # Instantiate the size distribution
         size_distrib = SizeDistribution(
-            np.array(self.modes),
-            np.array(self.spreads),
-            rad_domain,
-            weights,
+            modes=np.array(self.modes),
+            spreads=np.array(self.spreads),
+            radii=rad_domain,
+            counts=weights,
         )
 
         return size_distrib

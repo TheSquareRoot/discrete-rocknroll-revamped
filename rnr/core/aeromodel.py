@@ -43,7 +43,7 @@ class BaseAeroModel(AeroModel):
         lift_coeff: float,
         lift_power: float,
         burst_coeff: float,
-        **kwargs,
+        **kwargs: dict,
     ) -> None:
         self.density = density
         self.viscosity = viscosity
