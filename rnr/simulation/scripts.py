@@ -119,9 +119,7 @@ def single_run(
     flow_params = {**config["simulation"], **config["physics"]}
 
     # Build the distributions, the flow and the resuspension model
-    size_distrib, adh_distrib = _build_distribs(
-        size_params, adh_params, name, plot=True
-    )
+    size_distrib, adh_distrib = _build_distribs(size_params, adh_params, name, plot=True)
     flow = _build_flow(size_distrib, flow_params, name, plot=True)
     resusp_model = _build_model(
         config["physics"]["resuspension_model"],
@@ -133,7 +131,7 @@ def single_run(
     # Build a simulation and run it
     logger.info("Running simulation...")
     sim = Simulation(size_distrib, adh_distrib, flow, resusp_model)
-    res = sim.run(config["simulation"]["vectorized"])
+    res = sim.run(vectorized=config["simulation"]["vectorized"])
     res.name = config["info"]["short_name"]
     logger.info("Done.")
 
@@ -219,7 +217,7 @@ def fraction_velocity_curve(
         # Run the simulation
         logger.info(f"Running simulation {i + 1}/{velocities.shape[0]}...")
         sim = Simulation(size_distrib, adh_distrib, flow, resusp_model)
-        res = sim.run(config["simulation"]["vectorized"])
+        res = sim.run(vectorized=config["simulation"]["vectorized"])
         logger.info("Done.")
 
         # Store the final fraction
@@ -238,9 +236,7 @@ def fraction_velocity_curve(
     if plot:
         plot_fraction_velocity_curve([res], plot_exp=(config_file == "reeks"))
         # plot_fraction_derivative(res,)
-        print(
-            f"Critical threshold velocity (50%): {res.threshold_velocity(0.5):.2f}m/s"
-        )
+        print(f"Critical threshold velocity (50%): {res.threshold_velocity(0.5):.2f}m/s")
         print(f"Resuspension range: {res.resuspension_range:.2f}m/s")
 
     return res
