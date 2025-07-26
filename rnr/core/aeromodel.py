@@ -78,13 +78,7 @@ class BaseAeroModel(AeroModel):
         velocity = velocity.reshape(-1, 1)
         radii = radii.reshape(1, -1)
 
-        return (
-            self.drag_coeff
-            * 32.0
-            * self.density
-            * (self.viscosity**2)
-            * ((radii * velocity / self.viscosity) ** 2)
-        )
+        return self.drag_coeff * 32.0 * self.density * (self.viscosity**2) * ((radii * velocity / self.viscosity) ** 2)
 
     def burst(
         self,

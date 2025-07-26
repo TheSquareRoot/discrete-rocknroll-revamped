@@ -45,9 +45,7 @@ def force_rabinovich(radius: float, asperity_radius: float, peaktopeak: float) -
 def log_norm(x: float, mean: float, stdv: float) -> float:
     """Log normal PDF. Geometric parameters are used."""
     proba_density = (
-        (1 / np.sqrt(2 * np.pi))
-        * (1 / (x * np.log(stdv)))
-        * np.exp(-0.5 * (np.log(x / mean) / np.log(stdv)) ** 2)
+        (1 / np.sqrt(2 * np.pi)) * (1 / (x * np.log(stdv))) * np.exp(-0.5 * (np.log(x / mean) / np.log(stdv)) ** 2)
     )
 
     return proba_density
@@ -80,9 +78,7 @@ def median(values: NDArray, freqs: NDArray) -> float:
         freq_in_bin = freqs[median_bin_idx]  # Frequency of the median bin
 
         # Linear interpolation formula
-        med = bin_start + (bin_end - bin_start) * (
-            (total_count / 2 - freq_below) / freq_in_bin
-        )
+        med = bin_start + (bin_end - bin_start) * ((total_count / 2 - freq_below) / freq_in_bin)
 
     return med
 
@@ -94,8 +90,8 @@ def read_exp_data() -> dict:
     data = {}
 
     data_dir = Path("data/")
-    for filename in data_dir.iterdir():
-        match = pattern.match(filename)
+    for file in data_dir.iterdir():
+        match = pattern.match(file.name)
         # Extract the diameter and run number
         if match:
             diameter = int(match.group(1))
@@ -106,8 +102,8 @@ def read_exp_data() -> dict:
                 data[diameter] = {}
 
             # Read data from file and store it
-            with Path(f"data/{filename}").open("r") as file:
-                reader = csv.reader(file)
+            with file.open("r") as f:
+                reader = csv.reader(f)
                 next(reader)  # Skip the header row
 
                 data[diameter][run_nb] = [[], []]

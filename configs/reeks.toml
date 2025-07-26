@@ -1,10 +1,10 @@
 [info]
-full_name = 'reeks'
+full_name  = 'reeks'
 short_name = 'reeks'
 
 [adhdistrib]
-nbins   = 5000
-fmax = 30.0
+nbins = 5000
+fmax  = 30.0
 
 dist_params  = 'biasi'
 medians = [ 0.01047, ]
@@ -25,15 +25,16 @@ dt = 0.5
 target_vel = 0.9
 acc_time = 0.0
 transition = 'constant'
+perturbation = false
 
 vectorized = true
 
 [physics]
-adhesion_model = 'JKR'
+adhesion_model     = 'JKR'
 resuspension_model = 'RnR'
 
-density = 1.181
-viscosity = 1.539e-5
+density        = 1.181
+viscosity      = 1.539e-5
 surface_energy = 0.56
 
 # Parameters of the aerodynamic quantities model
