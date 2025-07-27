@@ -1,15 +1,13 @@
 import numpy as np
 from numpy.typing import NDArray
-from scipy.integrate import quad
+from scipy import stats
 
 from rnr.utils.config import setup_logging
 from rnr.utils.misc import (
     biasi_params,
     force_jkr,
     force_rabinovich,
-    log_norm,
     median,
-    normal,
 )
 
 # Configure module logger from utils file
@@ -17,17 +15,44 @@ logger = setup_logging(__name__, "logs/log.log")
 
 
 class SizeDistribution:
+    """
+    Represents a particle size distribution, including radii, modal parameters, and associated weights.
+
+    This class stores the radii bins and corresponding statistical parameters of a discrete or continuous
+    size distribution. It also provides convenience properties for unit conversion and metadata.
+
+    Parameters
+    ----------
+    modes : NDArray
+        The modal radius (in micrometers) of each size mode of the distribution.
+    spreads : NDArray
+        The standard deviation associated with each mode.
+    radii : NDArray
+        The center value of each size bin, in micrometers.
+    weights : NDArray
+        The probability weight associated with each radius bin. Must sum to 1.
+
+    Properties
+    ----------
+    nbins : int
+        Number of radius bins in the distribution (i.e., the number of values in `radii`).
+    nmodes : int
+        Number of modes in the distribution.
+    radii_meter : NDArray
+        Radii converted to meters.
+    """
+
     def __init__(
         self,
-        modes: NDArray[np.floating],
-        spreads: NDArray[np.floating],
-        radii: NDArray[np.floating],
-        counts: NDArray[np.floating],
+        modes: NDArray,
+        spreads: NDArray,
+        radii: NDArray,
+        weights: NDArray,
     ) -> None:
         self.modes = modes
         self.spreads = spreads
         self.radii = radii
-        self.weights = counts
+        self.weights = weights
 
     def __str__(self) -> str:
         return (
@@ -53,7 +78,7 @@ class SizeDistribution:
     @property
     def radii_meter(
         self,
-    ) -> NDArray[np.floating]:
+    ) -> NDArray:
         return self.radii * 1e-6
 
 
@@ -94,15 +119,15 @@ class SizeDistributionBuilder:
         nbins: int,
         modes: list[float],
         spreads: list[float],
-        weights: list[float],
-        **kwargs: dict,
+        coeffs: list[float],
+        **kwargs: dict,  # noqa: ARG002
     ) -> None:
         self.nmodes = nmodes
         self.width = width
         self.nbins = nbins
         self.modes = modes
         self.spreads = spreads
-        self.weights = weights
+        self.coeffs = coeffs
 
     def _radius_domain(
         self,
@@ -126,7 +151,7 @@ class SizeDistributionBuilder:
             modes=np.array(self.modes),
             spreads=np.zeros_like(self.modes),
             radii=np.array(self.modes),
-            counts=np.array(self.weights),
+            weights=np.array(self.coeffs),
         )
 
         return size_distrib
@@ -146,11 +171,7 @@ class SizeDistributionBuilder:
 
         for i in range(self.nbins):
             for j in range(self.nmodes):
-                weights[i] += self.weights[j] * normal(
-                    rad_domain[i],
-                    self.modes[j],
-                    self.spreads[j],
-                )
+                weights[i] = self.coeffs[j] * stats.norm.pdf(rad_domain[i], loc=self.modes[j], scale=self.spreads[j])
 
         # Normalize weights
         weights /= np.sum(weights)
@@ -160,7 +181,7 @@ class SizeDistributionBuilder:
             modes=np.array(self.modes),
             spreads=np.array(self.spreads),
             radii=rad_domain,
-            counts=weights,
+            weights=weights,
         )
 
         return size_distrib
@@ -168,6 +189,7 @@ class SizeDistributionBuilder:
     def generate(
         self,
     ) -> SizeDistribution:
+        """Wrapper for generator methods."""
         if any(x == 0 for x in self.spreads):
             return self._generate_no_spread()
         return self._generate_with_spread()
@@ -175,22 +197,51 @@ class SizeDistributionBuilder:
 
 class AdhesionDistribution:
     """
-    Represents the distribution of adhesion forces for each size bin.
+    Represents the distribution of adhesion forces across different particle size bins.
 
-    nr: number of size bins
-    na: number of adhesion bins
+    This class holds both the normalized adhesion force values and the associated probability weights
+    for each particle size bin. It also provides utilities for statistical analysis such as median,
+    mean, and geometric spread of the adhesion forces.
 
-    Attributes:
-        weights (NDArray[nr x na]): The probability associated to each adhesion force bin. Each line adds up to 1.
-        fadh_norm (NDArray[nr x na]): The normalized adhesion force value for each bin.
-        norm_factors (NDArray[nr]): Normalization factor for each size bin (unit: Newton) .
+    Notation
+    --------
+    nr : int
+        Number of particle size bins.
+    na : int
+        Number of adhesion force bins per size bin.
+
+    Parameters
+    ----------
+    weights : NDArray[nr x na]
+        The probability associated with each adhesion force bin for each size bin.
+        Each row should sum to 1.
+    fadh_norm : NDArray[nr x na]
+        The normalized adhesion force values. These are scaled to [0, fmax] and are dimensionless.
+    norm_factors : NDArray[nr]
+        Normalization factors (in Newtons) used to scale `fadh_norm` to actual force values per size bin.
+
+    Properties
+    ----------
+    nbins : int
+        Number of adhesion bins (na).
+    fadh : NDArray[nr x na]
+        Denormalized adhesion forces obtained by multiplying `fadh_norm` by `norm_factors`.
+
+    Methods
+    -------
+    median(i: int, norm: bool = True) -> float
+        Returns the median adhesion force for the i-th size bin, optionally normalized.
+    mean(i: int, norm: bool = True) -> float
+        Returns the mean adhesion force for the i-th size bin, optionally normalized.
+    geo_spread(i: int, norm: bool = True) -> float
+        Returns the geometric spread of the adhesion force distribution for the i-th size bin.
     """
 
     def __init__(
         self,
-        weights: NDArray[np.floating],
-        fadh_norm: NDArray[np.floating],
-        norm_factors: NDArray[np.floating],
+        weights: NDArray,
+        fadh_norm: NDArray,
+        norm_factors: NDArray,
     ) -> None:
         self.weights = weights
         self.fadh_norm = fadh_norm
@@ -210,42 +261,24 @@ class AdhesionDistribution:
     def nbins(
         self,
     ) -> int:
-        """Returns the number of adhesion bins."""
         return self.weights.shape[1]
 
     @property
     def fadh(
         self,
-    ) -> NDArray[np.floating]:
-        """Returns a denormalized adhesion force array"""
+    ) -> NDArray:
         return self.fadh_norm * self.norm_factors
 
     # Some statistical quantities --------------------------------------------------------------------------------------
     def median(self, i: int, *, norm: bool = True) -> float:
-        """
-        Computes the median adhesion force for a given size bin.
-
-        Args:
-            i (int): The size bin index.
-            norm (bool, optional): Whether to use the normalized adhesion force.
-        Returns:
-            float: The median adhesion force.
-        """
+        """Computes the median for a given size bin."""
         if norm:
             return median(self.fadh_norm[i], self.weights[i])
 
         return median(self.fadh[i], self.weights[i])
 
     def mean(self, i: int, *, norm: bool = True) -> float:
-        """
-        Computes the median adhesion force for a given size bin.
-
-        Args:
-            i (int): The size bin index.
-            norm (bool, optional): Whether to use the normalized adhesion force.
-        Returns:
-            float: The median adhesion force.
-        """
+        """Computes the mean for a given size bin."""
         if norm:
             return float(np.average(self.fadh_norm[i], weights=self.weights[i]))
         return float(np.average(self.fadh[i], weights=self.weights[i]))
@@ -257,62 +290,94 @@ class AdhesionDistribution:
 
 
 class AdhesionDistributionBuilder:
+    """
+    Builder class for generating adhesion force distributions based on a given particle size distribution.
+
+    This class supports two main modes of adhesion force generation:
+    1. Biasi-based mode: generates a lognormal adhesion force distribution using Biasi parameters.
+    2. Custom mode: constructs a user-defined distribution using a combination of known continuous
+       probability distributions from `scipy.stats`.
+
+    The generated adhesion distribution accounts for a specific adhesion force model, such as "JKR"
+    or "Rabinovich", and is discretized over a fixed number of bins up to a maximum adhesion force.
+
+    Parameters
+    ----------
+    size_distrib : SizeDistribution
+        A size distribution object providing radii and weights.
+    nbins : int
+        Number of bins used to discretize the adhesion force domain.
+    fmax : float
+        Maximum normalized adhesion force (upper bound of the support for the distribution).
+    adhesion_model : str
+        Adhesion model to use for normalization. Supported values: "JKR", "Rabinovich". Only JKR implemented for now!
+    biasi : bool
+        If True, use Biasi parameters to generate lognormal adhesion force distributions.
+        If False, use custom user-defined distributions via `scipy.stats`.
+    distnames : list of str, optional
+        List of distribution names from `scipy.stats` to be used in custom mode.
+    distshapes : list of float or list of list of float, optional
+        Shape parameters for each distribution in `distnames`.
+    loc : list of float, optional
+        Location parameters for each distribution.
+    scale : list of float, optional
+        Scale parameters for each distribution.
+    surface_energy : float, optional
+        Surface energy used in the JKR adhesion force model.
+    asperity_radius : float, optional
+        Asperity radius used in the Rabinovich model.
+    peaktopeak : float, optional
+        Surface roughness amplitude used in the Rabinovich model.
+    **kwargs : dict
+        Additional keyword arguments for future extensibility (currently unused).
+
+    Methods
+    -------
+    generate() -> AdhesionDistribution
+        Generates the adhesion force distribution using the configured parameters.
+    """
+
     def __init__(
         self,
         size_distrib: SizeDistribution,
         nbins: int,
         fmax: float,
-        dist_params: str,
         adhesion_model: str,
-        medians: list[float] | None = None,
-        spreads: list[float] | None = None,
+        biasi: bool,  # noqa: FBT001
+        distnames: list[str] | None = None,
+        loc: list[float] | None = None,
+        scale: list[float] | None = None,
+        distshapes: list[float] | None = None,
         surface_energy: float | None = None,
         asperity_radius: float | None = None,
         peaktopeak: float | None = None,
-        **kwargs: dict,
+        **kwargs: dict,  # noqa: ARG002
     ) -> None:
         self.size_distrib = size_distrib
         self.nbins = nbins
         self.fmax = fmax
-        self.dist_params = dist_params
-        self.medians = medians
-        self.spreads = spreads
+
+        self.biasi = biasi
+        self.distnames = distnames
+        self.distshapes = distshapes
+        self.loc = loc
+        self.scale = scale
 
         self.adhesion_model = adhesion_model
         self.surface_energy = surface_energy
         self.asperity_radius = asperity_radius
         self.peaktopeak = peaktopeak
 
-    def _compute_distribution_params(
-        self,
-        radii: NDArray[np.floating],
-    ) -> tuple:
-        """Wrapper to set the correct distribution medians and spreads."""
-        if self.dist_params == "biasi":
-            return biasi_params(
-                radii,
-            )
-        if self.dist_params == "custom":
-            # Distinguish between the spread and no spread case.
-            # If there is a radius spread, it is unlikely the user will provide medians and spreads for each size bin
-            # So instead, values have to be derived from the user inputs.
-            # If only set of parameters is used, it is applied to all size bins
-            if len(self.medians) == 1:
-                return (
-                    np.ones(self.size_distrib.nbins) * self.medians[0],
-                    np.ones(self.size_distrib.nbins) * self.spreads[0],
-                )
-            # If there as many sets of params are modes, one set is assigned to each mode
-            if len(self.medians) == self.size_distrib.nmodes:
-                # TODO: implement what happens when a set of parameters are provided for each mode
-                raise NotImplementedError(
-                    "Custom per-mode distribution parameters are not yet implemented.",
-                )
-            # Otherwise wtf are they doing anyway
-            raise ValueError(
-                f"Incorrect number of parameters provided: {len(self.medians)}",
-            )
-        raise ValueError(f"Unknown distribution parameter {self.dist_params}")
+    def _get_distribution(self) -> list[stats.rv_continuous]:
+        """Get distribution objects from `scipy.stats`"""
+        distlist = []
+        for name in self.distnames:
+            try:
+                distlist.append(getattr(stats, name))
+            except AttributeError as e:
+                logger.exception(f"Unknown distribution: {name}")
+                raise AttributeError from e
+        return distlist
 
     def _compute_norm_factor(
         self,
@@ -332,6 +397,50 @@ class AdhesionDistributionBuilder:
             )
         raise ValueError(f"Unknown adhesion model: {self.adhesion_model}")
 
+    def _compute_biasi_weights(self) -> tuple[NDArray, NDArray]:
+        """
+        Generate an adhesion force lognormal distribution using Biasi parameters.
+        """
+        # Initialize arrays
+        fadh_norm = np.empty([self.size_distrib.nbins, self.nbins])
+        weights = np.zeros_like(fadh_norm)
+
+        # Set Biasi parameters
+        medians, spreads = biasi_params(self.size_distrib.radii)
+
+        # Compute weights from a lognormal distribution
+        for i in range(self.size_distrib.nbins):
+            fadh_norm[i, :] = np.linspace(0, self.fmax, num=self.nbins + 1)[1:]
+            weights[i, :] = stats.lognorm.pdf(fadh_norm[i, :], *[np.log(spreads[i])], loc=0, scale=medians[i])
+
+            # Normalize weights
+            weights[i, :] /= weights[i, :].sum()
+
+        return fadh_norm, weights
+
+    def _compute_custom_weights(self) -> tuple[NDArray, NDArray]:
+        """
+        Generate a custom adhesion force distribution as a sum of distributions available in scipy.stats
+        Restricted to unimodal discrete particle size distributions.
+        """
+        # Initialize arrays
+        fadh_norm = np.empty([1, self.nbins])
+        weights = np.zeros_like(fadh_norm)
+
+        # Load distributions from scipy.stats
+        distlist = self._get_distribution()
+
+        # Compute the sum of user given distributions
+        for i in range(len(distlist)):
+            fadh_norm[0, :] = np.linspace(0, self.fmax, num=self.nbins + 1)[1:]
+            proba = distlist[i].pdf(fadh_norm[0, :], *self.distshapes[i], loc=self.loc[i], scale=self.scale[i])
+            weights[0, :] += proba / proba.sum()
+
+        # Normalize weights
+        weights /= weights.sum()
+
+        return fadh_norm, weights
+
     def generate(
         self,
     ) -> AdhesionDistribution:
@@ -339,14 +448,6 @@ class AdhesionDistributionBuilder:
         Generate an adhesion force distribution from the parameters loaded from the utils file.
         A log-normal distribution is assumed for each size bin.
         """
-        # Initialize arrays
-        edges = np.empty([self.size_distrib.nbins, self.nbins + 1])
-        fadh_norm = np.empty([self.size_distrib.nbins, self.nbins])
-        weights = np.empty_like(fadh_norm)
-
-        # Get the log-normal median and spread parameters
-        medians, spreads = self._compute_distribution_params(self.size_distrib.radii)
-
         # Compute the normalization factor for each size bin
         norm_factors = np.array(
             [
@@ -357,29 +458,16 @@ class AdhesionDistributionBuilder:
             ],
         )
 
-        for i in range(self.size_distrib.nbins):
-            edges[i, :] = np.linspace(0.0, medians[i] * self.fmax, self.nbins + 1)
-
-            fadh_norm[i, :] = (edges[i, 1:] + edges[i, :-1]) / 2
-
-            for j in range(self.nbins):
-                weights[i, j] = quad(
-                    log_norm,
-                    edges[i, j],
-                    edges[i, j + 1],
-                    args=(
-                        medians[i],
-                        spreads[i],
-                    ),
-                )[0]
-
-            # Normalize weights
-            weights[i, :] /= weights[i, :].sum()
+        # Compute the weights
+        if self.biasi:
+            fadh_norm, weights = self._compute_biasi_weights()
+        else:
+            fadh_norm, weights = self._compute_custom_weights()
 
         # Instantiate the adhesion force distribution
         adh_distrib = AdhesionDistribution(
-            weights,
-            fadh_norm,
-            norm_factors,
+            weights=weights,
+            fadh_norm=fadh_norm,
+            norm_factors=norm_factors,
         )
         return adh_distrib

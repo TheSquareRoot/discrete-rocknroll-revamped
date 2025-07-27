@@ -6,7 +6,8 @@ short_name = 'D10'
 nbins = 5000
 fmax = 20.0
 
-dist_params  = 'biasi'
+biasi = true
+
 medians = [ 0.0079, ]
 spreads = [ 6.2592, ]
 
@@ -16,7 +17,7 @@ width = 3.0
 
 modes   = [ 5.0, ]
 spreads = [ 0.0, ]
-weights = [ 1.0, ]
+coeffs = [ 1.0, ]
 
 [simulation]
 duration = 10.0

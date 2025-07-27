@@ -21,7 +21,7 @@ def load_config(file_path: str) -> dict:
         logger.error(f'Error: Configuration file "{file_path}" not found.')
         sys.exit(1)
     except toml.TomlDecodeError as e:
-        logger.error(f'Error: Failed to parse "{file_path}": {e}', file=sys.stderr)
+        logger.error(f'Error: Failed to parse "{file_path}": {e}')
         sys.exit(1)
 
 
@@ -51,13 +51,34 @@ def check_config(config: dict) -> None:
     config["sizedistrib"]["nmodes"] = len(config["sizedistrib"]["modes"])
 
     # ADHESION PARAMETERS
-    # If biasi params are selected, user should not define custom median and scatter values
-    if config["adhdistrib"]["dist_params"] == "biasi":
-        if (config["adhdistrib"]["medians"] is not None) or (config["distribution"]["spreads"] is not None):
-            logger.warning("Biasi parameters selected. Custom median and scatter parameters will be ignored.")
+    # Biasi parametrization can only be used with a lognormal distribution. If custom params are given, they will be ignored.
+    if config["adhdistrib"]["biasi"]:
+        if "distnames" in config["adhdistrib"]:
+            logger.warning("Biasi parametrization uses a lognormal distribution, custom distributions will be ignored.")
+
+        if "distshapes" in config["adhdistrib"]:
+            logger.warning("Biasi parametrization used, custom parameters will be ignored.")
 
         if config["physics"]["adhesion_model"] == "Rabinovich":
             logger.error("Biasi parameters should only be used with the JKR model.")
+            raise ValueError
+
+    else:
+        if any(x != 0 for x in config["sizedistrib"]["spreads"]):
+            logger.error("Custom parameters can only be used with discrete distributions!")
+            raise ValueError
+
+        if not (
+            len(config["adhdistrib"]["loc"])
+            == len(config["adhdistrib"]["scale"])
+            == len(config["adhdistrib"]["distshapes"])
+        ):
+            logger.error("disthapes, loc and scale should have the same length!")
+            raise ValueError
+
+        if config["sizedistrib"]["nbins"] > 1:
+            logger.error("For now multimodal distributions are only available with a single particle size bin!")
+            raise ValueError
 
     # SIMULATION PARAMETERS
     if config["simulation"]["duration"] < config["simulation"]["dt"]:

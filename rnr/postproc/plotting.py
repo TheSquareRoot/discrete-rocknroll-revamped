@@ -6,16 +6,14 @@ from rnr.core.distribution import AdhesionDistribution, SizeDistribution
 from rnr.core.flow import Flow
 from rnr.core.model import ResuspensionModel
 from rnr.postproc.results import FractionVelocityResults, TemporalResults
-from rnr.utils.misc import log_norm, read_exp_data
+from rnr.utils.misc import read_exp_data
 
 # ======================================================================================================================
 # DISTRIBUTION PLOTS
 # ======================================================================================================================
 
 
-def plot_size_distribution(
-    size_distrib: SizeDistribution, name: str, scale: str = "linear", **kwargs: dict
-) -> None:
+def plot_size_distribution(size_distrib: SizeDistribution, name: str, scale: str = "linear", **kwargs: dict) -> None:
     """
     Basic bar plot of the size distribution.
 
@@ -371,16 +369,10 @@ def plot_fraction_velocity_curve(
         fractions_exp = [exp_data[10][i][1] for i in [9, 10, 15]]
 
         # Interpolate simulation results at experimental velocities
-        fractions_sim_interp = [
-            np.interp(exp, results[0].velocities, results[0].fraction)
-            for exp in velocities_exp
-        ]
+        fractions_sim_interp = [np.interp(exp, results[0].velocities, results[0].fraction) for exp in velocities_exp]
 
         # Compute RMSE
-        rmse = [
-            np.sqrt(np.mean((fractions_sim_interp[i] - fractions_exp[i]) ** 2))
-            for i in range(3)
-        ]
+        rmse = [np.sqrt(np.mean((fractions_sim_interp[i] - fractions_exp[i]) ** 2)) for i in range(3)]
         print("------ RMSE ------")
         print(f"Exp  9: {rmse[0]:.4f}")
         print(f"Exp 10: {rmse[1]:.4f}")
@@ -459,28 +451,6 @@ def plot_fraction_velocity_difference(results: list[FractionVelocityResults]) ->
     fig.tight_layout()
 
     fig.savefig("figs/diff.png", dpi=300)
-    plt.close(fig)
-
-
-def plot_fraction_derivative(
-    res: FractionVelocityResults,
-) -> None:
-    # Plot
-    fig, ax = plt.subplots(figsize=(6, 4))
-
-    med = 0.93
-    spread = 1.72
-
-    lognormfit = np.array([log_norm(vel, med, spread) for vel in res.velocities])
-
-    ax.plot(res.velocities, res.fraction_derivative, color="r", zorder=10)
-    ax.plot(res.velocities, lognormfit, color="b", linestyle="--", zorder=10)
-
-    # ax.set_xscale('log')
-
-    fig.tight_layout()
-
-    fig.savefig("figs/fraction_derivative.png", dpi=300)
     plt.close(fig)
 
 

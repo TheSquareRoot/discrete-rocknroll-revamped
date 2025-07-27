@@ -4,19 +4,21 @@ short_name = 'reeks'
 
 [adhdistrib]
 nbins = 5000
-fmax  = 30.0
+fmax  = 0.5
 
-dist_params  = 'biasi'
-medians = [ 0.01047, ]
-spreads = [ 20.0, ]
+biasi = false
+distnames = ["lognorm",]
+distshapes = [[1.12,],]
+loc = [0,]
+scale = [0.011,] 
 
 [sizedistrib]
-nbins = 50
+nbins = 1
 width = 3.0
 
 modes   = [ 5.0, ]
 spreads = [ 0.0, ]
-weights = [ 1.0, ]
+coeffs = [ 1.0, ]
 
 [simulation]
 duration = 1.0
