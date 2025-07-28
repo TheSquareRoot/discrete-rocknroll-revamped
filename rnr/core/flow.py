@@ -1,28 +1,25 @@
-import matplotlib.pyplot as plt
 import numpy as np
-
 from numpy.typing import NDArray
 
-from rnr.utils.config import setup_logging
-from rnr.core.distribution import SizeDistribution
 from rnr.core.aeromodel import AeroModel
-
+from rnr.core.distribution import SizeDistribution
+from rnr.utils.config import setup_logging
 
 # Configure module logger from utils file
-logger = setup_logging(__name__, 'logs/log.log')
+logger = setup_logging(__name__, "logs/log.log")
 
 
 class Flow:
-    def __init__(self,
-                 velocity: NDArray[np.floating],
-                 lift: NDArray[np.floating],
-                 drag: NDArray[np.floating],
-                 faero: NDArray[np.floating],
-                 fluct_var: NDArray[np.floating],
-                 burst: NDArray[np.floating],
-                 time: NDArray[np.floating],
-                 ) -> None:
-
+    def __init__(
+        self,
+        velocity: NDArray[np.floating],
+        lift: NDArray[np.floating],
+        drag: NDArray[np.floating],
+        faero: NDArray[np.floating],
+        fluct_var: NDArray[np.floating],
+        burst: NDArray[np.floating],
+        time: NDArray[np.floating],
+    ) -> None:
         self.velocity = velocity
         self.lift = lift
         self.drag = drag
@@ -35,33 +32,35 @@ class Flow:
         return (
             f"Flow(\n"
             f"  velocity: {np.shape(self.velocity)}   - [{self.velocity[0]:.2e} ... {self.velocity[-1]:.2e}],\n"
-            f"  lift: {np.shape(self.lift)} - [{self.lift[0,0]:.2e} ... {self.lift[-1,-1]:.2e}],\n"
-            f"  drag: {np.shape(self.drag)} - [{self.drag[0,0]:.2e} ... {self.drag[-1,-1]:.2e}],\n"
+            f"  lift: {np.shape(self.lift)} - [{self.lift[0, 0]:.2e} ... {self.lift[-1, -1]:.2e}],\n"
+            f"  drag: {np.shape(self.drag)} - [{self.drag[0, 0]:.2e} ... {self.drag[-1, -1]:.2e}],\n"
             f"  burst: {np.shape(self.burst)} - [{self.burst[0]:.2e} ... {self.burst[-1]:.2e}]\n"
             f")"
         )
 
     @property
-    def nsteps(self,) -> int:
+    def nsteps(
+        self,
+    ) -> int:
         return len(self.time)
 
 
 class FlowBuilder:
-    def __init__(self,
-                 size_distrib: SizeDistribution,
-                 aeromodel: AeroModel,
-                 duration: float,
-                 dt: float,
-                 target_vel:  float,
-                 acc_time: float,
-                 transition: str,
-                 density: float,
-                 viscosity: float,
-                 frms: float,
-                 perturbation: bool = False,
-                 **kwargs,
-                 ) -> None:
-
+    def __init__(
+        self,
+        size_distrib: SizeDistribution,
+        aeromodel: AeroModel,
+        duration: float,
+        dt: float,
+        target_vel: float,
+        acc_time: float,
+        transition: str,
+        density: float,
+        viscosity: float,
+        frms: float,
+        perturbation: bool,  # noqa: FBT001
+        **kwargs: dict,
+    ) -> None:
         # Objects
         self.size_distrib = size_distrib
         self.aeromodel = aeromodel
@@ -81,17 +80,23 @@ class FlowBuilder:
         # Aerodynamic coeffs
         self.frms = frms
 
-    def generate(self,) -> Flow:
+    def generate(
+        self,
+    ) -> Flow:
         # First generate the time array
         time = np.arange(0.0, self.duration, self.dt)
 
         # Then compute the velocity as a function of time
         if self.acc_time != 0.0:
-            if self.transition == 'smooth':
+            if self.transition == "smooth":
                 scaled_time = np.minimum(time / self.acc_time, 1)
                 velocity = self.target_vel * (scaled_time**2 * (3 - 2 * scaled_time))
             else:
-                velocity = np.clip((self.target_vel / self.acc_time) * time, 0, self.target_vel)
+                velocity = np.clip(
+                    (self.target_vel / self.acc_time) * time,
+                    0,
+                    self.target_vel,
+                )
         else:
             velocity = np.ones_like(time) * self.target_vel
 
@@ -117,13 +122,14 @@ class FlowBuilder:
         burst = 0.5 * self.aeromodel.burst(velocity) / np.pi
 
         # Instantiate the flow class
-        flow = Flow(velocity,
-                    lift,
-                    drag,
-                    faero,
-                    fluct_var,
-                    burst,
-                    time,
-                    )
+        flow = Flow(
+            velocity,
+            lift,
+            drag,
+            faero,
+            fluct_var,
+            burst,
+            time,
+        )
 
         return flow
