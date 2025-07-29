@@ -39,7 +39,6 @@ def force_jkr(
 
 def force_rabinovich(radius: float, asperity_radius: float, peaktopeak: float) -> float:
     """Adhesion force of a spherical particle on a rough surface according to the Rabinovich model."""
-    pass
 
 
 def median(values: NDArray, freqs: NDArray) -> float:
