@@ -2,7 +2,7 @@ from pathlib import Path
 
 import numpy as np
 
-from rnr.core.aeromodel import BaseAeroModel
+from rnr.core.aeromodel import AeroModel
 from rnr.core.distribution import (
     AdhesionDistribution,
     AdhesionDistributionBuilder,
@@ -69,7 +69,7 @@ def _build_flow(
     plot: bool = False,
 ) -> Flow:
     # Instantiate force model
-    aeromodel = BaseAeroModel(**flow_params)
+    aeromodel = AeroModel(**flow_params)
 
     # Build the flow
     logger.info("Generating friction velocity time history...")
@@ -99,11 +99,10 @@ def _build_model(
     raise NotImplementedError
 
 
-def single_run(
-    config_file: str,
-) -> TemporalResults:
+def single_run(config_file: str | Path) -> TemporalResults:
     # Load utils file
-    config = load_config(f"configs/{config_file}.toml")
+    config_path = Path("configs") / f"{config_file}.toml"
+    config = load_config(config_path)
 
     # Check the values from the utils file
     logger.info("Checking parameters...")
@@ -145,19 +144,17 @@ def single_run(
     return res
 
 
-def multiple_runs(
-    config_dir: str,
-) -> None:
+def multiple_runs(config_dir: str | Path) -> None:
     # Get the config files from the directory
-    dir_path = Path(f"configs/{config_dir}/")
-    config_files = [f for f in dir_path.iterdir() if f.endswith(".toml")]
+    config_dir = Path("configs") / config_dir
+    config_files = [f for f in config_dir.iterdir() if f.suffix == ".toml"]
 
     # Run the simulations
     results = []
 
     for config_file in config_files:
-        path = f"{config_dir}/{config_file.split('.')[0]}"
-        results.append(single_run(path))
+        relative_path = config_file.relative_to("configs").with_suffix("")
+        results.append(single_run(relative_path))
 
     # Plot the results of all simulations on the same graph
     plot_resuspended_fraction(
@@ -170,13 +167,10 @@ def multiple_runs(
     )
 
 
-def fraction_velocity_curve(
-    config_file: str,
-    *,
-    plot: bool = True,
-) -> FractionVelocityResults:
+def fraction_velocity_curve(config_file: str | Path, *, plot: bool = True) -> FractionVelocityResults:
     # Load utils file
-    config = load_config(f"configs/{config_file}.toml")
+    config_path = Path("configs") / f"{config_file}.toml"
+    config = load_config(config_path)
 
     # Check the values from the utils file
     logger.info("Checking parameters...")
@@ -244,15 +238,15 @@ def fraction_velocity_curve(
 
 def multiple_fraction_velocity_curves(config_dir: str) -> None:
     # Get the config files from the directory
-    dir_path = Path(f"configs/{config_dir}/")
-    config_files = [f for f in dir_path.iterdir() if f.endswith(".toml")]
+    config_dir = Path("configs") / config_dir
+    config_files = [f for f in config_dir.iterdir() if f.suffix == ".toml"]
 
     # Run the simulations
     results = []
 
     for config_file in config_files:
-        path = f"{config_dir}/{config_file.split('.')[0]}"
-        results.append(fraction_velocity_curve(path, plot=False))
+        relative_path = config_file.relative_to("configs").with_suffix("")
+        results.append(fraction_velocity_curve(relative_path, plot=False))
 
     # Plot the results of all simulations on the same graph
     plot_fraction_velocity_curve(results, plot_exp=False, plot_stats=False)
