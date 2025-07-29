@@ -2,7 +2,7 @@ from pathlib import Path
 
 import numpy as np
 
-from rnr.core.aeromodel import BaseAeroModel
+from rnr.core.aeromodel import AeroModel
 from rnr.core.distribution import (
     AdhesionDistribution,
     AdhesionDistributionBuilder,
@@ -69,7 +69,7 @@ def _build_flow(
     plot: bool = False,
 ) -> Flow:
     # Instantiate force model
-    aeromodel = BaseAeroModel(**flow_params)
+    aeromodel = AeroModel(**flow_params)
 
     # Build the flow
     logger.info("Generating friction velocity time history...")
