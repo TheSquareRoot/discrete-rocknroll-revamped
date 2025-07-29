@@ -23,22 +23,22 @@ class ResuspensionModel:
         self,
         flow: Flow,
         t: int | None = None,
-    ) -> NDArray[np.floating]:
+    ) -> NDArray:
         pass
 
     def rate_vectorized(
         self,
-    ) -> NDArray[np.floating]:
+    ) -> NDArray:
         pass
 
 
 class RocknRollModel(ResuspensionModel):
     @staticmethod
     def compute_rate(
-        burst: NDArray[np.floating],
-        fluct: NDArray[np.floating],
-        fluct_var: NDArray[np.floating],
-    ) -> NDArray[np.floating]:
+        burst: NDArray,
+        fluct: NDArray,
+        fluct_var: NDArray,
+    ) -> NDArray:
         # Compute the resuspension rate
         rate = burst * np.exp(-(fluct**2) / (2 * fluct_var)) / (0.5 * (1 + erf(fluct / np.sqrt(2 * fluct_var))))
 
@@ -51,7 +51,7 @@ class RocknRollModel(ResuspensionModel):
         self,
         flow: Flow,
         t: int | None = None,
-    ) -> NDArray[np.floating]:
+    ) -> NDArray:
         if t is None:  # Vectorized case
             fadh = np.tile(self.adh_distrib.fadh, (flow.nsteps, 1, 1))
             faero = np.tile(flow.faero, (self.adh_distrib.nbins, 1, 1)).transpose(
@@ -90,20 +90,20 @@ class RocknRollModel(ResuspensionModel):
 class StaticMomentBalance(RocknRollModel):
     @staticmethod
     def compute_rate(
-        burst: NDArray[np.floating],
-        fluct: NDArray[np.floating],
-        fluct_var: NDArray[np.floating],
-    ) -> NDArray[np.floating]:
+        burst: NDArray,
+        fluct: NDArray,
+        fluct_var: NDArray,
+    ) -> NDArray:
         return np.where(fluct > 0, 0.0, 0.5 * burst / np.pi)
 
 
 class NonGaussianRocknRollModel(RocknRollModel):
     @staticmethod
     def compute_rate(
-        burst: NDArray[np.floating],
-        fluct: NDArray[np.floating],
-        fluct_var: NDArray[np.floating],
-    ) -> NDArray[np.floating]:
+        burst: NDArray,
+        fluct: NDArray,
+        fluct_var: NDArray,
+    ) -> NDArray:
         # Non-Gaussian distrib parameters
         a1 = 1.812562
         a2 = 1.463790

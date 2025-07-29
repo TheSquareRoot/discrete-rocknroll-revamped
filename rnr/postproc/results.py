@@ -27,8 +27,8 @@ class TemporalResults(Results):
         adh_distrib: AdhesionDistribution,
         size_distrib: SizeDistribution,
         flow: Flow,
-        counts: NDArray[np.floating],
-        time: NDArray[np.floating],
+        counts: NDArray,
+        time: NDArray,
     ) -> None:
         super().__init__(adh_distrib, size_distrib)
         self.flow = flow
@@ -38,17 +38,17 @@ class TemporalResults(Results):
     @property
     def remaining_fraction(
         self,
-    ) -> NDArray[np.floating]:
+    ) -> NDArray:
         return np.sum(self.counts, axis=(1, 2))
 
     @property
     def resuspended_fraction(
         self,
-    ) -> NDArray[np.floating]:
+    ) -> NDArray:
         return 1 - np.sum(self.counts, axis=(1, 2))
 
     @property
-    def instant_rate(self) -> NDArray[np.floating]:
+    def instant_rate(self) -> NDArray:
         return self.remaining_fraction[:-1] - self.remaining_fraction[1:]
 
     @property
@@ -65,9 +65,7 @@ class TemporalResults(Results):
 
     def time_to_fraction(self, fraction: float) -> float:
         # Normalize resuspended fraction by the final value
-        normalized_resuspended = (
-            self.resuspended_fraction / self.resuspended_fraction[-1]
-        )
+        normalized_resuspended = self.resuspended_fraction / self.resuspended_fraction[-1]
 
         # Find the index where the fraction first exceeds the target percentage
         idx = np.searchsorted(normalized_resuspended, fraction)
@@ -125,8 +123,8 @@ class FractionVelocityResults(Results):
         self,
         adh_distrib: AdhesionDistribution,
         size_distrib: SizeDistribution,
-        fraction: NDArray[np.floating],
-        velocities: NDArray[np.floating],
+        fraction: NDArray,
+        velocities: NDArray,
     ) -> None:
         super().__init__(adh_distrib, size_distrib)
         self.fraction = fraction
@@ -164,19 +162,13 @@ class FractionVelocityResults(Results):
 
         # Compute derivative using central differences for the interior points
         df_dv = np.zeros_like(self.fraction)
-        df_dv[1:-1] = (self.fraction[2:] - self.fraction[:-2]) / (
-            self.velocities[2:] - self.velocities[:-2]
-        )
+        df_dv[1:-1] = (self.fraction[2:] - self.fraction[:-2]) / (self.velocities[2:] - self.velocities[:-2])
 
         # Use forward difference for the first point
-        df_dv[0] = (self.fraction[1] - self.fraction[0]) / (
-            self.velocities[1] - self.velocities[0]
-        )
+        df_dv[0] = (self.fraction[1] - self.fraction[0]) / (self.velocities[1] - self.velocities[0])
 
         # Use backward difference for the last point
-        df_dv[-1] = (self.fraction[-1] - self.fraction[-2]) / (
-            self.velocities[-1] - self.velocities[-2]
-        )
+        df_dv[-1] = (self.fraction[-1] - self.fraction[-2]) / (self.velocities[-1] - self.velocities[-2])
 
         return np.abs(df_dv)
 
