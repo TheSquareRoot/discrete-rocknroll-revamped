@@ -12,17 +12,17 @@ from .config import setup_logging
 logger = setup_logging(__name__, "logs/log.log")
 
 
-def load_config(file_path: str) -> dict:
+def load_config(config_file: Path) -> dict:
     try:
-        with Path(file_path).open("r") as file:
-            logger.info(f"Loading configuration from {file_path}")
+        with config_file.open("r") as file:
+            logger.info("Loading configuration file...")
             return toml.load(file)
-    except FileNotFoundError:
-        logger.error(f'Error: Configuration file "{file_path}" not found.')
-        sys.exit(1)
+    except FileNotFoundError as e:
+        logger.exception("Configuration file not found!")
+        raise FileNotFoundError from e
     except toml.TomlDecodeError as e:
-        logger.error(f'Error: Failed to parse "{file_path}": {e}')
-        sys.exit(1)
+        logger.exception("Failed to parse configuration file!")
+        raise ValueError from e
 
 
 def check_model_validity(config: dict) -> None:
