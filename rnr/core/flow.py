@@ -1,24 +1,24 @@
+import logging
+
 import numpy as np
 from numpy.typing import NDArray
 
 from rnr.core.aeromodel import AeroModel
 from rnr.core.distribution import SizeDistribution
-from rnr.utils.config import setup_logging
 
-# Configure module logger from utils file
-logger = setup_logging(__name__, "logs/log.log")
+logger = logging.getLogger(__name__)
 
 
 class Flow:
     def __init__(
         self,
-        velocity: NDArray[np.floating],
-        lift: NDArray[np.floating],
-        drag: NDArray[np.floating],
-        faero: NDArray[np.floating],
-        fluct_var: NDArray[np.floating],
-        burst: NDArray[np.floating],
-        time: NDArray[np.floating],
+        velocity: NDArray,
+        lift: NDArray,
+        drag: NDArray,
+        faero: NDArray,
+        fluct_var: NDArray,
+        burst: NDArray,
+        time: NDArray,
     ) -> None:
         self.velocity = velocity
         self.lift = lift

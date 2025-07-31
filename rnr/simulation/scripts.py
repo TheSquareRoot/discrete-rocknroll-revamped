@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 
 import numpy as np
@@ -28,10 +29,9 @@ from rnr.postproc.plotting import (
 )
 from rnr.postproc.results import FractionVelocityResults, TemporalResults
 from rnr.simulation.simulation import Simulation
-from rnr.utils.config import setup_logging
 from rnr.utils.parameters import check_config, load_config
 
-logger = setup_logging(__name__, "logs/log.log")
+logger = logging.getLogger(__name__)
 
 
 def _build_distribs(

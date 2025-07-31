@@ -6,10 +6,14 @@ from rnr.core.distribution import (
     AdhesionDistributionBuilder,
     SizeDistributionBuilder,
 )
+from rnr.utils.config import setup_logging
 
 
 class TestDistribution(unittest.TestCase):
     def setUp(self):
+        # Set up logging configuration
+        setup_logging(testing=True)
+
         # Parameters
         self.size_nbins = 100
         self.adh_nbins = 1000

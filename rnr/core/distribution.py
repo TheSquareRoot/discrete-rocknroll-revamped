@@ -1,8 +1,9 @@
+import logging
+
 import numpy as np
 from numpy.typing import NDArray
 from scipy import stats
 
-from rnr.utils.config import setup_logging
 from rnr.utils.misc import (
     biasi_params,
     force_jkr,
@@ -10,8 +11,7 @@ from rnr.utils.misc import (
     median,
 )
 
-# Configure module logger from utils file
-logger = setup_logging(__name__, "logs/log.log")
+logger = logging.getLogger(__name__)
 
 
 class SizeDistribution:
@@ -375,7 +375,7 @@ class AdhesionDistributionBuilder:
             try:
                 distlist.append(getattr(stats, name))
             except AttributeError as e:
-                logger.exception(f"Unknown distribution: {name}")
+                logger.exception("Unknown distribution!")
                 raise AttributeError from e
         return distlist
 
@@ -395,7 +395,8 @@ class AdhesionDistributionBuilder:
                 self.asperity_radius,
                 self.peaktopeak,
             )
-        raise ValueError(f"Unknown adhesion model: {self.adhesion_model}")
+        logger.error("Unknown adhesion model!")
+        raise ValueError
 
     def _compute_biasi_weights(self) -> tuple[NDArray, NDArray]:
         """

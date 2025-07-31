@@ -5,11 +5,6 @@ from pathlib import Path
 import numpy as np
 from numpy.typing import NDArray
 
-from .config import setup_logging
-
-# Configure module logger from utils file
-logger = setup_logging(__name__, "logs/log.log")
-
 
 def rplus(radius: float, friction_vel: float, viscosity: float) -> float:
     """Computes the r+ quantity (i.e. the particle size expressed in wall units)"""
@@ -39,7 +34,6 @@ def force_jkr(
 
 def force_rabinovich(radius: float, asperity_radius: float, peaktopeak: float) -> float:
     """Adhesion force of a spherical particle on a rough surface according to the Rabinovich model."""
-    pass
 
 
 def median(values: NDArray, freqs: NDArray) -> float:
