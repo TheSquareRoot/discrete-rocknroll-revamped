@@ -6,8 +6,6 @@ from rnr.simulation.scripts import (
 )
 from rnr.utils.config import setup_logging, setup_parsing
 
-logger = setup_logging(__name__, "logs/log.log")
-
 
 def main() -> None:
     # Create parser
@@ -15,6 +13,10 @@ def main() -> None:
 
     # Parse CLI arghuments
     args = parser.parse_args()
+
+    # Set up logging configuration
+    log_level = "DEBUG" if args.verbose else "INFO"
+    setup_logging(testing=False, log_level=log_level)
 
     # Run simulations
     if args.single_run:

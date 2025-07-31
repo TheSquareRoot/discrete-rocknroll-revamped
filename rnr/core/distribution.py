@@ -1,8 +1,9 @@
+import logging
+
 import numpy as np
 from numpy.typing import NDArray
 from scipy import stats
 
-from rnr.utils.config import setup_logging
 from rnr.utils.misc import (
     biasi_params,
     force_jkr,
@@ -10,8 +11,7 @@ from rnr.utils.misc import (
     median,
 )
 
-# Configure module logger from utils file
-logger = setup_logging(__name__, "logs/log.log")
+logger = logging.getLogger(__name__)
 
 
 class SizeDistribution:

@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 
 import toml
@@ -5,10 +6,7 @@ import toml
 from rnr.postproc.plotting import plot_validity_domain
 from rnr.utils.misc import rplus
 
-from .config import setup_logging
-
-# Configure module logger from utils file
-logger = setup_logging(__name__, "logs/log.log")
+logger = logging.getLogger(__name__)
 
 
 def load_config(config_file: Path) -> dict:

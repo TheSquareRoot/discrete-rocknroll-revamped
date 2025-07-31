@@ -1,13 +1,14 @@
+import logging
+
 import numpy as np
 
 from rnr.core.distribution import AdhesionDistribution, SizeDistribution
 from rnr.core.flow import Flow
 from rnr.core.model import ResuspensionModel
 from rnr.postproc.results import TemporalResults
-from rnr.utils.config import setup_logging, setup_progress_bar
+from rnr.utils.config import setup_progress_bar
 
-# Configure module logger from utils file
-logger = setup_logging(__name__, "logs/log.log")
+logger = logging.getLogger(__name__)
 
 
 class Simulation:
