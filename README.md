@@ -25,9 +25,9 @@ If you are still using pip, a requirement file is also provided to be used as fo
 ### Planned improvement
 
 The code is still being actively developped. Here are some features that I plan to add in the future:
-- Extend available probability distributions using scipy.stats
+- Extend available probability distributions using scipy.stats (DONE)
 - Allow loading velocity time series from NetCDF files
-- Include additional models for aerodynamic forces
+- Include additional models for aerodynamic forces (DONE)
 - Include the Rabinovich model for adhesion force calculation
 
 ### Contact
