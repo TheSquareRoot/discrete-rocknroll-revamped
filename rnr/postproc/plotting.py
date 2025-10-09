@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import ticker
@@ -13,13 +15,19 @@ from rnr.utils.misc import read_exp_data
 # ======================================================================================================================
 
 
-def plot_size_distribution(size_distrib: SizeDistribution, name: str, scale: str = "linear", **kwargs: dict) -> None:
+def plot_size_distribution(
+    size_distrib: SizeDistribution,
+    casename: str,
+    setname: str | None = None,
+    scale: str = "linear",
+    **kwargs: dict,
+) -> None:
     """
     Basic bar plot of the size distribution.
 
     Args:
         size_distrib (SizeDistribution): Size distribution to plot.
-        name (str): Name of the configuration file. Will be used to save the figure in the right folder.
+        casename (str): Name of the configuration file. Will be used to save the figure in the right folder.
         scale (str, optional): Scale of the x_axis. Defaults to 'linear'.
     """
     fig, ax = plt.subplots(figsize=(6, 4))
@@ -36,14 +44,17 @@ def plot_size_distribution(size_distrib: SizeDistribution, name: str, scale: str
 
     fig.tight_layout()
 
-    fig.savefig(f"figs/{name}/size_distrib.png", dpi=300)
+    save_path = Path("figs") / (setname or "") / casename
+    fig.savefig(save_path / "size_distrib.png", dpi=300)
+
     plt.close(fig)
 
 
 def plot_adhesion_distribution(
     adh_distrib: AdhesionDistribution,
-    name: str,
-    i: int,
+    casename: str,
+    setname: str | None = None,
+    i: int = 0,
     norm: bool = True,
     scale: str = "log",
     **kwargs: dict,
@@ -53,7 +64,7 @@ def plot_adhesion_distribution(
 
     Args:
         adh_distrib (AdhesionDistribution): Adhesion distribution to plot.
-        name (str): Name of the configuration file. Will be used to save the figure in the right folder.
+        casename (str): Name of the configuration file. Will be used to save the figure in the right folder.
         i (int): Index of the size bin.
         norm (bool, optional): Whether to normalize the adhesion forces. Defaults to True.
         scale (str, optional): Scale of the x-axis. Defaults to 'log'.
@@ -83,7 +94,9 @@ def plot_adhesion_distribution(
 
     fig.tight_layout()
 
-    fig.savefig(f"figs/{name}/adh_distrib.png", dpi=300)
+    save_path = Path("figs") / (setname or "") / casename
+    fig.savefig(save_path / "adh_distrib.png", dpi=300)
+
     plt.close(fig)
 
 
@@ -117,8 +130,9 @@ def plot_velocity_history(flow: Flow, scale: str = "linear", **kwargs: dict) -> 
 
 def plot_flow(
     flow: Flow,
-    name: str,
-    i: int,
+    casename: str,
+    setname: str | None = None,
+    i: int = 0,
     scale: str = "linear",
     **kwargs: dict,
 ) -> None:
@@ -127,7 +141,7 @@ def plot_flow(
 
     Args:
         flow (Flow): Flow containing the velocity time history.
-        name (str): Name of the configuration file. Will be used to save the figure in the right folder.
+        casename (str): Name of the configuration file. Will be used to save the figure in the right folder.
         i (int): Index of the size bin.
         scale (str, optional): Scale of the x-axis. Defaults to 'linear'.
     """
@@ -164,7 +178,9 @@ def plot_flow(
 
     fig.tight_layout()
 
-    fig.savefig(f"figs/{name}/all_aero_forces.png", dpi=300)
+    save_path = Path("figs") / (setname or "") / casename
+    fig.savefig(save_path / "aero_forces.png", dpi=300)
+
     plt.close(fig)
 
 
@@ -175,7 +191,8 @@ def plot_flow(
 
 def plot_resuspended_fraction(
     results: list[TemporalResults],
-    name: str,
+    casename: str,
+    setname: str | None = None,
     scale: str = "log",
 ) -> None:
     """
@@ -183,7 +200,7 @@ def plot_resuspended_fraction(
 
     Args:
         results (list[TemporalResults]): List of simulation result objects.
-        name (str): Name of the configuration file. Will be used to save the figure in the right folder.
+        casename (str): Name of the configuration file. Will be used to save the figure in the right folder.
         scale (str, optional): Scale of the x-axis. Defaults to 'log'.
     """
     fig, ax = plt.subplots(figsize=(6, 5))
@@ -215,13 +232,16 @@ def plot_resuspended_fraction(
 
     fig.tight_layout()
 
-    fig.savefig(f"figs/{name}/resuspended_fraction.png", dpi=300)
+    save_path = Path("figs") / (setname or "") / casename
+    fig.savefig(save_path / "resuspended_fraction.png", dpi=300)
+
     plt.close(fig)
 
 
 def plot_instant_rate(
     results: list[TemporalResults],
-    name: str,
+    casename: str,
+    setname: str | None = None,
     xscale: str = "log",
     yscale: str = "log",
 ) -> None:
@@ -230,7 +250,7 @@ def plot_instant_rate(
 
     Args:
         results (list[TemporalResults]): List of simulation result objects.
-        name (str): Name of the configuration file. Will be used to save the figure in the right folder.
+        casename (str): Name of the configuration file. Will be used to save the figure in the right folder.
         xscale (str, optional): Scale of the x-axis. Defaults to 'log'.
         yscale (str, optional): Scale of the y-axis. Defaults to 'log'.
     """
@@ -253,7 +273,9 @@ def plot_instant_rate(
 
     fig.tight_layout()
 
-    fig.savefig(f"figs/{name}/instant_rate.png", dpi=300)
+    save_path = Path("figs") / (setname or "") / casename
+    fig.savefig(save_path / "instant_rate.png", dpi=300)
+
     plt.close(fig)
 
 
