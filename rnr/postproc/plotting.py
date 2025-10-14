@@ -339,6 +339,8 @@ def plot_validity_domain(
 
 def plot_fraction_velocity_curve(
     results: list[FractionVelocityResults],
+    casename: str,
+    setname: str | None = None,
     *,
     plot_exp: bool = False,
     plot_stats: bool = True,
@@ -357,7 +359,6 @@ def plot_fraction_velocity_curve(
         ax.plot(
             res.velocities,
             res.fraction,
-            color="r",
             label=res.name,
             zorder=10,
         )
@@ -444,7 +445,9 @@ def plot_fraction_velocity_curve(
 
     fig.tight_layout()
 
-    fig.savefig("figs/validation.png", dpi=300)
+    save_path = Path("figs") / (setname or "") / casename
+    fig.savefig(save_path / "fraction_velocity.png", dpi=300)
+
     plt.close(fig)
 
 
