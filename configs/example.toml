@@ -23,7 +23,7 @@ dt = 1e-4
 target_vel = 0.6
 acc_time = 0.0
 transition = 'constant'
-perturbation = true
+perturbation = false
 
 vectorized = false
 
