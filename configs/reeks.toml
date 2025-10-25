@@ -17,6 +17,8 @@ spreads = [ 0.0, ]
 coeffs = [ 1.0, ]
 
 [simulation]
+read_from_file = false
+
 duration = 1.0
 dt = 0.5
 

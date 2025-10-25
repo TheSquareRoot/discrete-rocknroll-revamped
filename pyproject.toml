@@ -18,6 +18,8 @@ dependencies = [
     "pygments==2.19.1",
     "pyparsing==3.2.1",
     "pytest>=8.4.1",
+    "pytest-cov>=6.2.1",
+    "pytest-sugar>=1.0.0",
     "python-dateutil==2.9.0.post0",
     "rich==13.9.4",
     "scipy==1.15.2",
@@ -25,3 +27,10 @@ dependencies = [
     "toml==0.10.2",
     "typing-extensions==4.12.2",
 ]
+
+[tool.coverage.run]
+omit = [
+    "*/__init__.py", 
+    "main.py",
+    "tests/*",
+    ]

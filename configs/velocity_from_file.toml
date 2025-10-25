@@ -1,6 +1,6 @@
 [info]
-full_name = 'example'
-short_name = 'example'
+full_name = 'velocity_from_file'
+short_name = 'velocity_from_file'
 
 [adhdistrib]
 nbins = 5000
@@ -17,15 +17,11 @@ spreads = [ 0.0, ]
 coeffs = [ 1.0, ]
 
 [simulation]
-read_from_file = false
+read_from_file = true
+input_file = "velocity"
 
-duration = 10.0
-dt = 1e-4
-
-target_vel = 0.6
-acc_time = 0.0
-transition = 'constant'
-perturbation = false
+# In this case, this is a new sampling rate
+dt = 1e-3
 
 vectorized = false
 

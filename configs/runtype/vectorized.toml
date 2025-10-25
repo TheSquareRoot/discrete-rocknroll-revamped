@@ -1,6 +1,6 @@
 [info]
-full_name = 'example'
-short_name = 'example'
+full_name = 'vectorized'
+short_name = 'vectorized'
 
 [adhdistrib]
 nbins = 5000
@@ -27,7 +27,7 @@ acc_time = 0.0
 transition = 'constant'
 perturbation = false
 
-vectorized = false
+vectorized = true
 
 [physics]
 adhesion_model = 'JKR'

@@ -37,9 +37,6 @@ logger = logging.getLogger(__name__)
 def _build_distribs(
     size_params: dict,
     adh_params: dict,
-    name: str | None = None,
-    *,
-    plot: bool = False,
 ) -> tuple[SizeDistribution, AdhesionDistribution]:
     # Build the particle size distribution
     logger.info("Generating size distribution...")
@@ -52,11 +49,6 @@ def _build_distribs(
     adhesion_builder = AdhesionDistributionBuilder(size_distrib, **adh_params)
     adh_distrib = adhesion_builder.generate()
     logger.debug(f"Adhesion distribution generated: {adh_distrib}")
-
-    # Plot the distributions if the user requested
-    if plot:
-        plot_size_distribution(size_distrib, name, scale="linear")
-        plot_adhesion_distribution(adh_distrib, name, 0, norm=False, scale="linear")
 
     return size_distrib, adh_distrib
 
@@ -77,10 +69,6 @@ def _build_flow(
     flow = flow_builder.generate()
     logger.debug(f"Flow generated: {flow}")
 
-    # Plot the time histories if requested
-    if plot:
-        plot_flow(flow, name, 0)
-
     return flow
 
 
@@ -99,7 +87,7 @@ def _build_model(
     raise NotImplementedError
 
 
-def single_run(config_file: str | Path) -> TemporalResults:
+def single_run(config_file: str | Path, setname: str | None = None) -> TemporalResults:
     # Load utils file
     config_path = Path("configs") / f"{config_file}.toml"
     config = load_config(config_path)
@@ -109,8 +97,9 @@ def single_run(config_file: str | Path) -> TemporalResults:
     check_config(config)
 
     # Create the output folder for figures
-    name = config["info"]["full_name"]
-    Path(f"figs/{name}").mkdir(parents=True, exist_ok=True)
+    casename = config["info"]["full_name"]
+    out_path = Path("figs") / (setname or "") / casename
+    out_path.mkdir(parents=True, exist_ok=True)
 
     # Compose the argument dicts for the builders
     size_params = config["sizedistrib"]
@@ -118,8 +107,8 @@ def single_run(config_file: str | Path) -> TemporalResults:
     flow_params = {**config["simulation"], **config["physics"]}
 
     # Build the distributions, the flow and the resuspension model
-    size_distrib, adh_distrib = _build_distribs(size_params, adh_params, name, plot=True)
-    flow = _build_flow(size_distrib, flow_params, name, plot=True)
+    size_distrib, adh_distrib = _build_distribs(size_params, adh_params)
+    flow = _build_flow(size_distrib, flow_params, casename, plot=True)
     resusp_model = _build_model(
         config["physics"]["resuspension_model"],
         size_distrib,
@@ -134,40 +123,71 @@ def single_run(config_file: str | Path) -> TemporalResults:
     res.name = config["info"]["short_name"]
     logger.info("Done.")
 
-    # Plot basic results
+    # Basic plots
+    plot_size_distribution(
+        size_distrib,
+        casename=casename,
+        setname=setname,
+        scale="linear",
+    )
+    plot_adhesion_distribution(
+        adh_distrib,
+        casename=casename,
+        setname=setname,
+        norm=False,
+        scale="linear",
+    )
+
+    plot_flow(
+        flow,
+        casename=casename,
+        setname=setname,
+    )
+
     plot_resuspended_fraction(
         [res],
-        name,
+        casename=casename,
+        setname=setname,
     )
-    plot_instant_rate([res], name)
+    plot_instant_rate(
+        [res],
+        casename=casename,
+        setname=setname,
+    )
 
     return res
 
 
 def multiple_runs(config_dir: str | Path) -> None:
     # Get the config files from the directory
-    config_dir = Path("configs") / config_dir
-    config_files = [f for f in config_dir.iterdir() if f.suffix == ".toml"]
+    config_path = Path("configs") / config_dir
+    config_files = [f for f in config_path.iterdir() if f.suffix == ".toml"]
+
+    # Create output directory if necessary
+    Path(f"figs/{config_dir}").mkdir(parents=True, exist_ok=True)
 
     # Run the simulations
     results = []
 
     for config_file in config_files:
         relative_path = config_file.relative_to("configs").with_suffix("")
-        results.append(single_run(relative_path))
+        results.append(single_run(relative_path, setname=config_dir))
 
     # Plot the results of all simulations on the same graph
     plot_resuspended_fraction(
         results,
-        name="multi",
+        casename=config_dir,
     )
     plot_instant_rate(
         results,
-        name="multi",
+        casename=config_dir,
     )
 
 
-def fraction_velocity_curve(config_file: str | Path, *, plot: bool = True) -> FractionVelocityResults:
+def fraction_velocity_curve(
+    config_file: str | Path,
+    setname: str | None = None,
+) -> FractionVelocityResults:
     # Load utils file
     config_path = Path("configs") / f"{config_file}.toml"
     config = load_config(config_path)
@@ -175,6 +195,11 @@ def fraction_velocity_curve(config_file: str | Path, *, plot: bool = True) -> Fr
     # Check the values from the utils file
     logger.info("Checking parameters...")
     check_config(config)
+
+    # Create the output folder for figures
+    casename = config["info"]["full_name"]
+    out_path = Path("figs") / (setname or "") / casename
+    out_path.mkdir(parents=True, exist_ok=True)
 
     # The number of timesteps does not matter since we assume constant velocity
     if config["simulation"]["perturbation"]:
@@ -191,7 +216,7 @@ def fraction_velocity_curve(config_file: str | Path, *, plot: bool = True) -> Fr
     adh_params = {**config["adhdistrib"], **config["physics"]}
 
     # Build the distributions
-    size_distrib, adh_distrib = _build_distribs(size_params, adh_params, plot=False)
+    size_distrib, adh_distrib = _build_distribs(size_params, adh_params)
     resusp_model = _build_model(
         config["physics"]["resuspension_model"],
         size_distrib,
@@ -227,27 +252,31 @@ def fraction_velocity_curve(config_file: str | Path, *, plot: bool = True) -> Fr
     res.name = config["info"]["short_name"]
 
     # Plot the curve
-    if plot:
-        plot_fraction_velocity_curve([res], plot_exp=(config_file == "reeks"))
-        # plot_fraction_derivative(res,)
-        print(f"Critical threshold velocity (50%): {res.threshold_velocity(0.5):.2f}m/s")
-        print(f"Resuspension range: {res.resuspension_range:.2f}m/s")
+    plot_fraction_velocity_curve(
+        [res],
+        casename=casename,
+        setname=setname,
+        plot_exp=(config_file == "reeks"),
+    )
+    # plot_fraction_derivative(res,)
+    print(f"Critical threshold velocity (50%): {res.threshold_velocity(0.5):.2f}m/s")
+    print(f"Resuspension range: {res.resuspension_range:.2f}m/s")
 
     return res
 
 
 def multiple_fraction_velocity_curves(config_dir: str) -> None:
     # Get the config files from the directory
-    config_dir = Path("configs") / config_dir
-    config_files = [f for f in config_dir.iterdir() if f.suffix == ".toml"]
+    config_path = Path("configs") / config_dir
+    config_files = [f for f in config_path.iterdir() if f.suffix == ".toml"]
 
     # Run the simulations
     results = []
 
     for config_file in config_files:
         relative_path = config_file.relative_to("configs").with_suffix("")
-        results.append(fraction_velocity_curve(relative_path, plot=False))
+        results.append(fraction_velocity_curve(relative_path, setname=config_dir))
 
     # Plot the results of all simulations on the same graph
-    plot_fraction_velocity_curve(results, plot_exp=False, plot_stats=False)
+    plot_fraction_velocity_curve(results, casename=config_dir, plot_exp=False, plot_stats=False)
     plot_fraction_velocity_difference(results)

@@ -12,7 +12,7 @@ from rich.progress import (
 )
 
 
-def setup_logging(*, testing: bool = False, log_level: str) -> None:
+def setup_logging(*, testing: bool = False, log_level: str = "INFO") -> None:
     """
     Set up application-wide logging configuration.
 
