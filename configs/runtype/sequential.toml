@@ -1,6 +1,6 @@
 [info]
-full_name = 'example'
-short_name = 'example'
+full_name = 'sequential'
+short_name = 'sequential'
 
 [adhdistrib]
 nbins = 5000

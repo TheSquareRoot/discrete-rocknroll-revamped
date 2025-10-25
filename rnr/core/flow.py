@@ -54,7 +54,7 @@ class FlowBuilder:
         density: float,
         viscosity: float,
         frms: float,
-        read_from_file: bool,  # noqa: FBT001
+        read_from_file: bool | None = None,  # noqa: FBT001
         input_file: str | None = None,
         duration: float | None = None,
         dt: float | None = None,
