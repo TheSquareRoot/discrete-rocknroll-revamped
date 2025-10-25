@@ -1,8 +1,9 @@
 # discrete-rocknroll-revamped
 This is a python implementation of the Rock'n'Roll resuspension model. The model is described in [1]. The implementation uses the parametrization proposed by [2]. The main features of this implementation are:
 
-- Discretized distributions for adhesion forces and particle size.
-- Unsteady friction velocity inputs
+- Discretized distributions for adhesion forces and particle size (all scipy.stats distributions are available for use!)
+- Unsteady friction velocity inputs (both generated in place and read from .npy files.)
+- Several drag force models.
 - Plotting capabilities
 
 Although the focus here is on the Rock'n'Roll model, any other kinetic models (models that compute a resuspension rate from a set of parameters) can be integrated into the code quite easily.
@@ -25,10 +26,10 @@ If you are still using pip, a requirement file is also provided to be used as fo
 ### Planned improvement
 
 The code is still being actively developped. Here are some features that I plan to add in the future:
-- Extend available probability distributions using scipy.stats (DONE)
-- Allow loading velocity time series from NetCDF files
-- Include additional models for aerodynamic forces (DONE)
-- Include the Rabinovich model for adhesion force calculation
+- Memory optimization using dask.
+- Saving simulation results to plot later.
+- More extensive control of the frequency content of friction velocity perturbations.
+- Include the Rabinovich model for adhesion force calculation.
 
 ### Contact
 Mail: victor.bourgin@universite-paris-saclay.fr \
