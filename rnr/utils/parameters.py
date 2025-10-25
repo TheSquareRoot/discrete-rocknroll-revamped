@@ -78,12 +78,13 @@ def check_config(config: dict) -> None:
             raise ValueError
 
     # SIMULATION PARAMETERS
-    if config["simulation"]["duration"] < config["simulation"]["dt"]:
-        logger.error(f"dt must be smaller than total duration. dt set to {config['simulation']['duration']:.2f}s")
-        config["simulation"]["dt"] = config["simulation"]["duration"]
+    if not config["simulation"]["read_from_file"]:  # Only check these params if the velocity signal is generated
+        if config["simulation"]["duration"] < config["simulation"]["dt"]:
+            logger.error(f"dt must be smaller than total duration. dt set to {config['simulation']['duration']:.2f}s")
+            config["simulation"]["dt"] = config["simulation"]["duration"]
 
-    if config["simulation"]["duration"] < config["simulation"]["acc_time"]:
-        logger.warning("Spin-up time is longer than simulation time.")
+        if config["simulation"]["duration"] < config["simulation"]["acc_time"]:
+            logger.warning("Spin-up time is longer than simulation time.")
 
     # Check whether the hypothesis of the RnR model are respected
     check_model_validity(config)
